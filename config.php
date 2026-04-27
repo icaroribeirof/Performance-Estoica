@@ -1,37 +1,40 @@
 <?php
-// Configuração do Banco de Dados
-date_default_timezone_set('America/Sao_Paulo');
-define('DB_HOST', 'localhost');
-define('DB_USER', 'root');
-define('DB_PASS', '');
-define('DB_NAME', 'performance_estoica');
+// Carrega as variáveis do arquivo .env
+$env = parse_ini_file(__DIR__ . '/.env');
 
-// Criar conexão
-$conexao = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+// Configurações da aplicação
+date_default_timezone_set($env['APP_TIMEZONE']);
 
-// Verificar conexão
+// Conexão com o Banco de Dados
+$conexao = new mysqli(
+    $env['DB_HOST'],
+    $env['DB_USER'],
+    $env['DB_PASS'],
+    $env['DB_NAME']
+);
+
 if ($conexao->connect_error) {
-    die("Erro na conexão: " . $conexao->connect_error);
+    die('Erro na conexão: ' . $conexao->connect_error);
 }
 
-// Definir charset
-$conexao->set_charset("utf8mb4");
+$conexao->set_charset('utf8mb4');
 
-// Iniciar sessão
+// Sessão
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
 // Função para sanitizar input
-function sanitizar($input) {
+function sanitizar(string $input): string
+{
     return htmlspecialchars(strip_tags(trim($input)));
 }
 
 // Função para verificar login
-function verificarLogin() {
+function verificarLogin(): void
+{
     if (!isset($_SESSION['usuario_id'])) {
-        header("Location: login.php");
+        header('Location: login.php');
         exit();
     }
 }
-?>
