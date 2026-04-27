@@ -1,0 +1,22 @@
+/* Estilos do Cadastro - Herda de login.css */
+.auth-form {
+    animation: slideInDown 0.5s ease-out;
+}
+
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .auth-box {
+        min-height: auto;
+        padding: 1.5rem 1rem;
+    }
+}
