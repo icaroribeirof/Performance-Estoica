@@ -17,12 +17,12 @@ if ($acao === 'listar') {
 
     switch ($filtro) {
         case 'hoje':
-            $where  .= " AND t.data_atual = ?";
+            $where  .= " AND DATE(t.data_atual) = ?";
             $params[] = $hoje;
             $types   .= "s";
             break;
         case 'agendadas':
-            $where  .= " AND t.data_atual > ? AND t.concluida = 0";
+            $where  .= " AND DATE(t.data_atual) > ? AND t.concluida = 0";
             $params[] = $hoje;
             $types   .= "s";
             break;
@@ -34,9 +34,11 @@ if ($acao === 'listar') {
             break;
     }
 
+    $orderDirection = ($filtro === 'concluidas') ? 'DESC' : 'ASC';
+
     $sql  = "SELECT * FROM tarefas t $where ORDER BY
                 CASE WHEN t.data_atual IS NULL THEN 1 ELSE 0 END,
-                t.data_atual ASC,
+                t.data_atual $orderDirection,
                 CASE t.prioridade WHEN 'alta' THEN 1 WHEN 'media' THEN 2 ELSE 3 END";
 
     $stmt = $conexao->prepare($sql);
@@ -68,8 +70,8 @@ if ($acao === 'adicionar') {
         exit;
     }
 
-    $data_atual = $data_atual ?: null;
-    $data_venc  = $data_venc  ?: null;
+    $data_atual = $data_atual ? date('Y-m-d H:i:s', strtotime($data_atual)) : null;
+    $data_venc  = $data_venc  ? date('Y-m-d H:i:s', strtotime($data_venc)) : null;
 
     // Sem recorrência: data_vencimento = data_atual
     if ($recorrencia === 'nenhuma') {
@@ -105,8 +107,8 @@ if ($acao === 'editar') {
         exit;
     }
 
-    $data_atual = $data_atual ?: null;
-    $data_venc  = $data_venc  ?: null;
+    $data_atual = $data_atual ? date('Y-m-d H:i:s', strtotime($data_atual)) : null;
+    $data_venc  = $data_venc  ? date('Y-m-d H:i:s', strtotime($data_venc)) : null;
 
     if ($recorrencia === 'nenhuma') {
         $data_venc = $data_atual;
@@ -232,7 +234,7 @@ function calcularProximaData(string $data_atual, string $recorrencia): ?string {
             return null;
     }
 
-    return $base->format('Y-m-d');
+    return $base->format('Y-m-d H:i:s');
 }
 
 echo json_encode(['sucesso' => false, 'mensagem' => 'Ação inválida']);

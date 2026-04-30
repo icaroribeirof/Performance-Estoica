@@ -40,10 +40,9 @@ function exibirTarefas(tarefas) {
     }
 
     const hoje = new Date();
-    hoje.setHours(0, 0, 0, 0);
 
     lista.forEach(tarefa => {
-        const dataAtual  = tarefa.data_atual ? new Date(tarefa.data_atual + 'T00:00:00') : null;
+        const dataAtual  = tarefa.data_atual ? new Date(tarefa.data_atual.replace(' ', 'T')) : null;
         const isAtrasada = dataAtual && dataAtual < hoje && !tarefa.concluida;
 
         const item = document.createElement('div');
@@ -147,7 +146,11 @@ function configurarModal() {
     btnAbrir.addEventListener('click', () => {
         formNovo.reset();
         if (grpLimite) grpLimite.style.display = 'none';
-        if (inputData) inputData.value = new Date().toISOString().split('T')[0];
+        if (inputData) {
+            const now = new Date();
+            const offset = now.getTimezoneOffset() * 60000;
+            inputData.value = (new Date(now - offset)).toISOString().substring(0, 16);
+        }
         el('mensagemErroModal')?.classList.remove('ativo');
         modalNovo.classList.add('ativo');
     });
@@ -252,7 +255,7 @@ function abrirModalEdicao(id) {
     if (el('edit_titulo'))      el('edit_titulo').value      = tarefa.titulo;
     if (el('edit_descricao'))   el('edit_descricao').value   = tarefa.descricao || '';
     if (el('edit_prioridade'))  el('edit_prioridade').value  = tarefa.prioridade;
-    if (el('edit_dataAtual'))   el('edit_dataAtual').value   = tarefa.data_atual || '';
+    if (el('edit_dataAtual'))   el('edit_dataAtual').value   = formatDatetimeLocal(tarefa.data_atual) || '';
     if (el('edit_recorrencia')) el('edit_recorrencia').value = tarefa.recorrencia || 'nenhuma';
 
     const temRec        = tarefa.recorrencia && tarefa.recorrencia !== 'nenhuma';
@@ -260,7 +263,7 @@ function abrirModalEdicao(id) {
     const inputLimite   = el('edit_dataVencimento');
 
     if (grpLimiteEdit) grpLimiteEdit.style.display = temRec ? '' : 'none';
-    if (inputLimite)   inputLimite.value = temRec ? (tarefa.data_vencimento || '') : '';
+    if (inputLimite)   inputLimite.value = temRec ? (formatDatetimeLocal(tarefa.data_vencimento) || '') : '';
 
     el('mensagemErroModalEdit')?.classList.remove('ativo');
     el('modalEditarTarefaOverlay')?.classList.add('ativo');
@@ -375,10 +378,23 @@ function escapeHtml(text) {
         .replace(/'/g, '&#39;');
 }
 
+function formatDatetimeLocal(data) {
+    if (!data) return '';
+    return data.replace(' ', 'T').substring(0, 16);
+}
+
 function formatarData(data) {
     if (!data) return '';
-    const [ano, mes, dia] = data.split('-');
-    return `${dia.substring(0, 2)}/${mes}/${ano}`;
+    const partes = data.split(' ');
+    const dataStr = partes[0];
+    const timeStr = partes[1] || '';
+
+    const [ano, mes, dia] = dataStr.split('-');
+    let result = `${dia.substring(0, 2)}/${mes}/${ano}`;
+    if (timeStr) {
+        result += ` às ${timeStr.substring(0, 5)}`;
+    }
+    return result;
 }
 
 function formatarRecorrencia(rec) {

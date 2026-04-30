@@ -63,6 +63,7 @@ function exibirMetasProximas(metas) {
     metasOrdena.forEach(meta => {
         const dias = calcularDiasRestantes(meta.data_termino);
         const diasTexto = dias > 0 ? `${dias} dias restantes` : 'Vencida';
+        const progressoCalculado = calcularProgressoData(meta.data_inicio, meta.data_termino);
         
         const item = document.createElement('div');
         item.className = 'item';
@@ -70,7 +71,7 @@ function exibirMetasProximas(metas) {
             <div class="item-content">
                 <div class="item-title">${meta.titulo}</div>
                 <div class="item-meta">
-                    Progresso: ${meta.progresso}% • ${diasTexto}
+                    Progresso Temporal: ${progressoCalculado}% • ${diasTexto}
                 </div>
             </div>
             <div class="item-actions">
@@ -233,6 +234,29 @@ function calcularDiasRestantes(data) {
     const termino = new Date(data);
     const diferenca = termino - hoje;
     return Math.ceil(diferenca / (1000 * 60 * 60 * 24));
+}
+
+function calcularProgressoData(dataInicio, dataTermino) {
+    if (!dataInicio || !dataTermino) return 0;
+    
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+    
+    const inicio = new Date(dataInicio + 'T00:00:00');
+    inicio.setHours(0, 0, 0, 0);
+    
+    const termino = new Date(dataTermino + 'T00:00:00');
+    termino.setHours(0, 0, 0, 0);
+    
+    if (inicio > termino) return 0;
+    if (hoje < inicio) return 0;
+    if (hoje >= termino) return 100;
+    
+    const msPorDia = 1000 * 60 * 60 * 24;
+    const totalDias = Math.round((termino - inicio) / msPorDia) + 1;
+    const diasPassados = Math.round((hoje - inicio) / msPorDia) + 1;
+    
+    return Math.round((diasPassados / totalDias) * 100);
 }
 
 function configurarModais() {

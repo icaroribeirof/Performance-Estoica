@@ -1,5 +1,5 @@
 -- Esquema do Banco de Dados: Performance Estóica
--- Versão: 1.1 (Atualizado em 2026-04-23)
+-- Versão: 1.2 (Atualizado em 2026-04-30)
 
 CREATE DATABASE IF NOT EXISTS performance_estoica CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE performance_estoica;
@@ -36,7 +36,8 @@ CREATE TABLE IF NOT EXISTS tarefas (
     usuario_id INT NOT NULL,
     titulo VARCHAR(200) NOT NULL,
     descricao TEXT,
-    data_vencimento DATE,
+    data_vencimento DATETIME,
+    data_atual DATETIME,
     prioridade ENUM('baixa', 'media', 'alta') DEFAULT 'media',
     recorrencia ENUM('nenhuma', 'diaria', 'semanal', 'anual', 'dias_semana') DEFAULT 'nenhuma',
     concluida BOOLEAN DEFAULT FALSE,
@@ -100,14 +101,7 @@ CREATE TABLE IF NOT EXISTS progresso_treinos (
 -- Atualizações Individuais (Caso precise rodar apenas o que mudou)
 -- ALTER TABLE tarefas MODIFY COLUMN recorrencia ENUM('nenhuma', 'diaria', 'semanal', 'anual', 'dias_semana') DEFAULT 'nenhuma';
 
--- Migration: adiciona coluna data_atual na tabela tarefas
--- Execute este script no seu banco de dados MySQL
-
-ALTER TABLE tarefas
-    ADD COLUMN data_atual DATE NULL AFTER data_vencimento;
-
--- Popula data_atual com o valor de data_vencimento para tarefas existentes
-UPDATE tarefas SET data_atual = data_vencimento WHERE data_atual IS NULL;
-
--- Renomeia data_vencimento para deixar semântica clara (opcional - se preferir manter o nome antigo, não execute esta linha)
--- ALTER TABLE tarefas RENAME COLUMN data_vencimento TO data_limite;
+-- Migration: Alteração para DATETIME para suporte a horários
+-- Execute estes comandos se seu banco ainda estiver na versão 1.1
+ALTER TABLE tarefas MODIFY COLUMN data_atual DATETIME NULL;
+ALTER TABLE tarefas MODIFY COLUMN data_vencimento DATETIME NULL;

@@ -38,6 +38,7 @@ function exibirMetas(metas) {
 
     metasFiltradas.forEach(meta => {
         const dias = calcularDiasRestantes(meta.data_termino);
+        const progressoCalculado = calcularProgressoData(meta.data_inicio, meta.data_termino);
         const card = document.createElement('div');
         card.className = 'meta-card';
         card.innerHTML = `
@@ -51,15 +52,14 @@ function exibirMetas(metas) {
             </div>
             <div class="meta-progress">
                 <div class="progress-label">
-                    <span>Progresso</span>
-                    <span>${meta.progresso}%</span>
+                    <span>Progresso Temporal</span>
+                    <span>${progressoCalculado}%</span>
                 </div>
                 <div class="progress-bar">
-                    <div class="progress-fill" style="width: ${meta.progresso}%"></div>
+                    <div class="progress-fill" style="width: ${progressoCalculado}%"></div>
                 </div>
             </div>
             <div class="meta-actions">
-                <button class="btn btn-primary btn-small" onclick="abrirModalProgresso(${meta.id}, ${meta.progresso})">Progresso</button>
                 <button class="btn btn-secondary btn-small" onclick="abrirModalEdicaoCompleta(${meta.id})">Editar</button>
                 <button class="btn btn-danger btn-small" onclick="deletarMeta(${meta.id})">Deletar</button>
             </div>
@@ -203,25 +203,27 @@ function salvarEdicaoCompletaMeta() {
     });
 }
 
-function abrirModalProgresso(metaId, progresso) {
-    const novoProgresso = prompt('Novo progresso (%): ', progresso);
-    if (novoProgresso !== null && novoProgresso >= 0 && novoProgresso <= 100) {
-        const formData = new FormData();
-        formData.append('id', metaId);
-        formData.append('progresso', novoProgresso);
-        formData.append('status', 'em_progresso');
-
-        fetch('api/metas.php?acao=atualizar', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.sucesso) {
-                carregarMetas();
-            }
-        });
-    }
+function calcularProgressoData(dataInicio, dataTermino) {
+    if (!dataInicio || !dataTermino) return 0;
+    
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+    
+    const inicio = new Date(dataInicio + 'T00:00:00');
+    inicio.setHours(0, 0, 0, 0);
+    
+    const termino = new Date(dataTermino + 'T00:00:00');
+    termino.setHours(0, 0, 0, 0);
+    
+    if (inicio > termino) return 0;
+    if (hoje < inicio) return 0;
+    if (hoje >= termino) return 100;
+    
+    const msPorDia = 1000 * 60 * 60 * 24;
+    const totalDias = Math.round((termino - inicio) / msPorDia) + 1;
+    const diasPassados = Math.round((hoje - inicio) / msPorDia) + 1;
+    
+    return Math.round((diasPassados / totalDias) * 100);
 }
 
 function deletarMeta(metaId) {

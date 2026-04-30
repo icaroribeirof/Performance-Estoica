@@ -16,6 +16,7 @@ verificarLogin();
 </head>
 <body>
     <div class="container-app">
+        <div id="sidebarOverlay" class="sidebar-overlay"></div>
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-header">
@@ -53,7 +54,12 @@ verificarLogin();
         <main class="main-content">
             <!-- Header -->
             <header class="top-header">
-                <h1>✓ Minhas Tarefas</h1>
+                <div class="header-title-wrapper">
+                    <button id="btnMobileMenu" class="mobile-menu-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                    </button>
+                    <h1>✓ Minhas Tarefas</h1>
+                </div>
                 <button id="btnNovaTarefaModal" class="btn btn-primary btn-small">
                     + Nova Tarefa
                 </button>
@@ -103,8 +109,8 @@ verificarLogin();
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="dataAtual">Data da tarefa</label>
-                        <input type="date" id="dataAtual" name="dataAtual">
+                        <label for="dataAtual">Data e Hora da tarefa</label>
+                        <input type="datetime-local" id="dataAtual" name="dataAtual">
                     </div>
                 </div>
 
@@ -121,8 +127,8 @@ verificarLogin();
 
                 <!-- Só aparece quando há recorrência -->
                 <div class="form-group" id="group_data_limite" style="display:none;">
-                    <label for="dataVencimento">Repetir até (data limite)</label>
-                    <input type="date" id="dataVencimento" name="dataVencimento">
+                    <label for="dataVencimento">Repetir até (data e hora limite)</label>
+                    <input type="datetime-local" id="dataVencimento" name="dataVencimento">
                 </div>
 
                 <div id="mensagemErroModal" class="mensagem-erro"></div>
@@ -160,8 +166,8 @@ verificarLogin();
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="edit_dataAtual">Data da tarefa</label>
-                        <input type="date" id="edit_dataAtual" name="dataAtual">
+                        <label for="edit_dataAtual">Data e Hora da tarefa</label>
+                        <input type="datetime-local" id="edit_dataAtual" name="dataAtual">
                     </div>
                 </div>
 
@@ -178,8 +184,8 @@ verificarLogin();
 
                 <!-- Só aparece quando há recorrência -->
                 <div class="form-group" id="edit_group_data_limite" style="display:none;">
-                    <label for="edit_dataVencimento">Repetir até (data limite)</label>
-                    <input type="date" id="edit_dataVencimento" name="dataVencimento">
+                    <label for="edit_dataVencimento">Repetir até (data e hora limite)</label>
+                    <input type="datetime-local" id="edit_dataVencimento" name="dataVencimento">
                 </div>
 
                 <div id="mensagemErroModalEdit" class="mensagem-erro"></div>
@@ -189,6 +195,7 @@ verificarLogin();
     </div>
 
     <script src="js/confirm-modal.js"></script>
+    <script src="js/menu.js"></script>
     <script src="js/tarefas.js"></script>
 </body>
 </html>
