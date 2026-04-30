@@ -127,6 +127,9 @@
     padding: 2rem;
     max-width: 500px;
     width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
     box-shadow: var(--shadow-xl);
     animation: slideInUp 0.3s ease-out;
 }
@@ -438,6 +441,11 @@
 }
 
 @media (max-width: 768px) {
+    .modal {
+        padding: 1.5rem;
+        max-height: 85vh;
+    }
+
     .stats-grid {
         grid-template-columns: repeat(2, 1fr);
     }

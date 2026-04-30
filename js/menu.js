@@ -24,4 +24,19 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    // Prevent body scroll when any modal is open
+    const observer = new MutationObserver((mutations) => {
+        let anyModalOpen = false;
+        document.querySelectorAll('.modal-overlay').forEach(modal => {
+            if (modal.classList.contains('ativo')) {
+                anyModalOpen = true;
+            }
+        });
+        document.body.style.overflow = anyModalOpen ? 'hidden' : '';
+    });
+
+    document.querySelectorAll('.modal-overlay').forEach(modal => {
+        observer.observe(modal, { attributes: true, attributeFilter: ['class'] });
+    });
 });
