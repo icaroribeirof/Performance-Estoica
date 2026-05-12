@@ -13,7 +13,47 @@ if ($acao === 'listar') {
     $result = $stmt->get_result();
     $metas = [];
 
+    $hoje = new DateTime('today');
+
     while ($row = $result->fetch_assoc()) {
+        // Calcular progresso temporal
+        if (!empty($row['data_inicio']) && !empty($row['data_termino'])) {
+            $inicio  = new DateTime($row['data_inicio']);
+            $termino = new DateTime($row['data_termino']);
+
+            if ($hoje >= $termino) {
+                $progressoTemporal = 100;
+            } elseif ($hoje < $inicio) {
+                $progressoTemporal = 0;
+            } else {
+                $totalDias   = $inicio->diff($termino)->days + 1;
+                $diasPassados = $inicio->diff($hoje)->days + 1;
+                $progressoTemporal = (int) round(($diasPassados / $totalDias) * 100);
+                if ($progressoTemporal > 100) $progressoTemporal = 100;
+            }
+
+
+            // Sincronizar status com o progresso temporal (cancelada nunca é alterada)
+            if ($row['status'] !== 'cancelada') {
+                if ($progressoTemporal >= 100 && $row['status'] !== 'concluida') {
+                    $novoStatus = 'concluida';
+                } elseif ($progressoTemporal < 100 && $row['status'] !== 'em_progresso') {
+                    $novoStatus = 'em_progresso';
+                } else {
+                    $novoStatus = null; // sem mudança
+                }
+
+                if ($novoStatus !== null) {
+                    $stmtUpd = $conexao->prepare("UPDATE metas SET status = ? WHERE id = ? AND usuario_id = ?");
+                    $stmtUpd->bind_param("sii", $novoStatus, $row['id'], $usuario_id);
+                    $stmtUpd->execute();
+                    $stmtUpd->close();
+                    $row['status'] = $novoStatus;
+                }
+            }
+
+        }
+
         $metas[] = $row;
     }
 

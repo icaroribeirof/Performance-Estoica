@@ -39,12 +39,21 @@ function exibirMetas(metas) {
     metasFiltradas.forEach(meta => {
         const dias = calcularDiasRestantes(meta.data_termino);
         const progressoCalculado = calcularProgressoData(meta.data_inicio, meta.data_termino);
+
+        // Derivar status automaticamente do progresso temporal (cancelada é preservada)
+        const statusEfetivo = meta.status === 'cancelada' ? 'cancelada'
+                            : progressoCalculado >= 100    ? 'concluida'
+                            : 'em_progresso';
+        const statusLabel = statusEfetivo === 'em_progresso' ? 'Em Progresso'
+                          : statusEfetivo === 'concluida'   ? 'Concluída'
+                          : 'Cancelada';
+
         const card = document.createElement('div');
         card.className = 'meta-card';
         card.innerHTML = `
             <div class="meta-header">
                 <h3 class="meta-title">${meta.titulo}</h3>
-                <span class="meta-status ${meta.status}">${meta.status === 'em_progresso' ? 'Em Progresso' : meta.status === 'concluida' ? 'Concluída' : 'Cancelada'}</span>
+                <span class="meta-status ${statusEfetivo}">${statusLabel}</span>
             </div>
             ${meta.descricao ? `<p class="meta-descricao">${meta.descricao}</p>` : ''}
             <div class="meta-data">
