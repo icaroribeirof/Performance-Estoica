@@ -57,7 +57,7 @@ function exibirMetas(metas) {
             </div>
             ${meta.descricao ? `<p class="meta-descricao">${meta.descricao}</p>` : ''}
             <div class="meta-data">
-                Início: ${formatarData(meta.data_inicio)} • Término: ${formatarData(meta.data_termino)} • ${dias > 0 ? `${dias} dias` : 'Vencida'}
+                Início: ${formatarData(meta.data_inicio)} • Término: ${formatarData(meta.data_termino)} • ${dias > 0 ? `${dias} dias` : statusEfetivo === 'concluida' ? 'Finalizada' : 'Vencida'}
             </div>
             <div class="meta-progress">
                 <div class="progress-label">

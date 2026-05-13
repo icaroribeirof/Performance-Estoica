@@ -56,14 +56,19 @@ function exibirMetasProximas(metas) {
     }
 
     const metasOrdena = metas
-        .filter(m => m.status !== 'cancelada')
+        .filter(m => m.status !== 'cancelada' && m.status !== 'concluida')
         .sort((a, b) => new Date(a.data_termino) - new Date(b.data_termino))
         .slice(0, 3);
 
+    if (metasOrdena.length === 0) {
+        container.innerHTML = '<p class="text-empty">Nenhuma meta em andamento</p>';
+        return;
+    }
+
     metasOrdena.forEach(meta => {
         const dias = calcularDiasRestantes(meta.data_termino);
-        const diasTexto = dias > 0 ? `${dias} dias restantes` : 'Vencida';
         const progressoCalculado = calcularProgressoData(meta.data_inicio, meta.data_termino);
+        const diasTexto = dias > 0 ? `${dias} dias restantes` : progressoCalculado >= 100 ? 'Finalizada' : 'Vencida';
         
         const item = document.createElement('div');
         item.className = 'item';
