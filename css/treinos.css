@@ -1,215 +1,112 @@
-/* Estilos para Modais */
-.modal-overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.7);
-    z-index: 2000;
-    align-items: center;
-    justify-content: center;
-    animation: fadeIn 0.3s ease-out;
-}
+/* ══════════════════════════════════════════════════════════════════════
+   Treinos — Page-specific Styles (no duplication)
+   ══════════════════════════════════════════════════════════════════════ */
 
-.modal-overlay.ativo {
-    display: flex;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
-}
-
-.modal {
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 0.75rem;
-    padding: 2rem;
-    max-width: 500px;
-    width: 90%;
-    box-shadow: var(--shadow-xl);
-    animation: slideInUp 0.3s ease-out;
-}
-
-@keyframes slideInUp {
-    from {
-        transform: translateY(30px);
-        opacity: 0;
-    }
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
-}
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.modal-header h2 {
-    font-size: 1.5rem;
-    color: var(--text-primary);
-}
-
-.modal-close {
-    background: none;
-    border: none;
-    font-size: 2rem;
-    color: var(--text-secondary);
-    cursor: pointer;
-    transition: var(--transition);
-    padding: 0;
-    width: 2rem;
-    height: 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.modal-close:hover {
-    color: var(--text-primary);
-}
-
-/* Form Modal */
-.form-modal {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-}
-
-.form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-}
-
-.form-select {
-    width: 100%;
-    padding: 0.75rem;
-    background: rgba(15, 23, 42, 0.8);
-    border: 2px solid var(--border-color);
-    border-radius: 0.5rem;
-    color: var(--text-primary);
-    font-size: 1rem;
-    transition: var(--transition);
-    cursor: pointer;
-    appearance: none;
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f1f5f9' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-    background-repeat: no-repeat;
-    background-position: right 0.75rem center;
-    background-size: 1.2em 1.2em;
-    padding-right: 2.5rem;
-}
-
-.form-select option {
-    background: var(--card-bg);
-    color: var(--text-primary);
-    padding: 0.75rem;
-}
-
-.form-select:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    background-color: rgba(99, 102, 241, 0.15);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
-}
-
-/* Estilos para Treinos */
-
+/* ── Fichas Grid ───────────────────────────────────────────────────── */
 .fichas-container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: var(--space-4);
 }
 
+/* ── Ficha Card ────────────────────────────────────────────────────── */
 .ficha-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 0.75rem;
-    padding: 1.5rem;
-    transition: var(--transition);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-lg);
+    padding: var(--space-5);
+    transition: all var(--transition);
     display: flex;
     flex-direction: column;
 }
 
 .ficha-card:hover {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
-    transform: translateY(-4px);
+    border-color: var(--border-hover);
+    box-shadow: var(--shadow-md), var(--shadow-glow-primary);
 }
 
 .ficha-header {
-    margin-bottom: 1rem;
+    margin-bottom: var(--space-3);
 }
 
 .ficha-titulo {
-    font-size: 1.25rem;
-    font-weight: 600;
+    font-size: var(--font-md);
+    font-weight: var(--weight-semibold);
     color: var(--text-primary);
-    margin-bottom: 0.5rem;
+    margin-bottom: var(--space-1);
 }
 
 .ficha-dias {
-    font-size: 0.875rem;
-    color: var(--text-secondary);
+    font-size: var(--font-sm);
+    color: var(--text-tertiary);
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+.ficha-dias svg {
+    width: 14px;
+    height: 14px;
+    color: var(--text-tertiary);
 }
 
 .ficha-descricao {
-    color: var(--text-secondary);
-    margin-bottom: 1.5rem;
-    font-size: 0.95rem;
+    color: var(--text-tertiary);
+    font-size: var(--font-sm);
+    line-height: var(--leading-relaxed);
+    margin-bottom: var(--space-4);
     flex: 1;
 }
 
+/* ── Exercícios List ───────────────────────────────────────────────── */
 .exercicios-list {
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--border-color);
+    margin-bottom: var(--space-4);
+    padding-bottom: var(--space-4);
+    border-bottom: 1px solid var(--border-secondary);
 }
 
 .exercicios-list h4 {
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-    margin-bottom: 0.5rem;
+    font-size: var(--font-xs);
+    font-weight: var(--weight-semibold);
+    color: var(--text-tertiary);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.06em;
+    margin-bottom: var(--space-3);
 }
 
 .exercicio-item {
-    background: rgba(99, 102, 241, 0.05);
-    border: 1px solid rgba(99, 102, 241, 0.15);
-    padding: 0.625rem 0.75rem;
-    border-radius: 0.4rem;
-    font-size: 0.85rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-secondary);
+    padding: var(--space-3);
+    border-radius: var(--radius-md);
+    font-size: var(--font-sm);
     color: var(--text-primary);
-    margin-bottom: 0.5rem;
+    margin-bottom: var(--space-2);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 0.75rem;
+    gap: var(--space-3);
+    transition: all var(--transition);
+}
+
+.exercicio-item:last-child {
+    margin-bottom: 0;
+}
+
+.exercicio-item:hover {
+    border-color: var(--border-hover);
 }
 
 .exercicio-info {
     display: flex;
     flex-direction: column;
-    gap: 0.2rem;
+    gap: 2px;
     flex: 1;
     min-width: 0;
 }
 
 .exercicio-nome {
-    font-weight: 600;
+    font-weight: var(--weight-medium);
     color: var(--text-primary);
     white-space: nowrap;
     overflow: hidden;
@@ -217,14 +114,14 @@
 }
 
 .exercicio-detalhes {
-    font-size: 0.8rem;
-    color: var(--primary-color);
-    opacity: 0.85;
+    font-size: var(--font-xs);
+    color: var(--primary-400);
+    font-weight: var(--weight-medium);
 }
 
 .exercicio-notas {
-    font-size: 0.78rem;
-    color: var(--text-secondary);
+    font-size: var(--font-xs);
+    color: var(--text-tertiary);
     font-style: italic;
     white-space: nowrap;
     overflow: hidden;
@@ -233,220 +130,245 @@
 
 .exercicio-actions {
     display: flex;
-    gap: 0.5rem;
+    gap: var(--space-1);
     align-items: center;
+    flex-shrink: 0;
 }
 
 .btn-exercicio-del,
 .btn-exercicio-edit {
-    background: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: transparent;
     border: none;
-    color: var(--text-secondary);
+    color: var(--text-tertiary);
     cursor: pointer;
-    font-size: 1.15rem;
-    transition: var(--transition);
-    padding: 0.25rem;
+    border-radius: var(--radius-sm);
+    transition: all var(--transition);
+    font-size: var(--font-base);
 }
 
-.btn-exercicio-del:hover,
 .btn-exercicio-edit:hover {
-    color: var(--primary-color);
+    background: rgba(148, 163, 184, 0.08);
+    color: var(--text-primary);
 }
 
+.btn-exercicio-del:hover {
+    background: var(--danger-50);
+    color: var(--danger-text);
+}
+
+/* ── Ficha Actions ─────────────────────────────────────────────────── */
 .ficha-actions {
     display: flex;
-    gap: 0.5rem;
+    gap: var(--space-2);
 }
 
 .ficha-actions .btn {
     flex: 1;
-    font-size: 0.875rem;
-    padding: 0.5rem;
+    font-size: var(--font-sm);
+    padding: var(--space-2) var(--space-3);
 }
 
-/* Tabs */
-.tabs-section {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 2rem;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 1rem;
-}
-
-.tab-btn {
-    padding: 0.625rem 1.25rem;
-    background: transparent;
-    border: none;
-    color: var(--text-secondary);
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 1rem;
-    transition: var(--transition);
-    border-bottom: 3px solid transparent;
-    margin-bottom: -1rem;
-    padding-bottom: 1.625rem;
-}
-
-.tab-btn:hover {
-    color: var(--primary-color);
-}
-
-.tab-btn.ativo {
-    color: var(--primary-color);
-    border-bottom-color: var(--primary-color);
-}
-
-.tab-content {
-    display: none;
-    animation: fadeIn 0.3s ease-out;
-}
-
-.tab-content.ativo {
-    display: block;
-}
-
-/* Registros */
+/* ── Registros ─────────────────────────────────────────────────────── */
 .registros-header {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-    margin-bottom: 2rem;
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
 }
 
 .registros-header select {
     width: 200px;
-    padding: 0.625rem 0.875rem;
-    background: rgba(30, 41, 59, 0.5);
-    border: 2px solid var(--border-color);
-    border-radius: 0.5rem;
-    color: var(--text-primary);
-    font-size: 1rem;
-    cursor: pointer;
-    transition: var(--transition);
-}
-
-.registros-header select:focus {
-    outline: none;
-    border-color: var(--primary-color);
 }
 
 .stats-box {
     display: flex;
-    gap: 1rem;
+    gap: var(--space-3);
     flex-wrap: wrap;
 }
 
 .stat-mini {
-    background: rgba(99, 102, 241, 0.1);
-    padding: 1rem;
-    border-radius: 0.5rem;
-    border: 1px solid var(--border-color);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-primary);
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    min-width: 140px;
 }
 
 .stat-mini-label {
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    margin-bottom: 0.5rem;
+    font-size: var(--font-xs);
+    font-weight: var(--weight-medium);
+    color: var(--text-tertiary);
+    margin-bottom: var(--space-1);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
 }
 
 .stat-mini-value {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--primary-color);
+    font-size: var(--font-xl);
+    font-weight: var(--weight-bold);
+    color: var(--primary-400);
 }
 
+/* ── Registros Container ───────────────────────────────────────────── */
 .registros-container {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: var(--space-2);
 }
 
 .registro-item {
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 0.75rem;
-    padding: 1.5rem;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4) var(--space-5);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    transition: var(--transition);
+    transition: all var(--transition);
 }
 
 .registro-item:hover {
-    border-color: var(--primary-color);
-    background: rgba(99, 102, 241, 0.05);
+    border-color: var(--border-hover);
 }
 
 .registro-info {
     flex: 1;
+    min-width: 0;
 }
 
 .registro-data {
-    font-weight: 600;
+    font-weight: var(--weight-medium);
     color: var(--text-primary);
-    margin-bottom: 0.5rem;
+    margin-bottom: var(--space-1);
+    font-size: var(--font-base);
 }
 
 .registro-meta {
     display: flex;
-    gap: 1.5rem;
-    font-size: 0.875rem;
-    color: var(--text-secondary);
+    gap: var(--space-3);
+    font-size: var(--font-sm);
+    color: var(--text-tertiary);
+    align-items: center;
 }
 
 .registro-intensidade {
-    display: inline-block;
-    padding: 0.25rem 0.625rem;
-    border-radius: 0.25rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    padding: 2px var(--space-2);
+    border-radius: var(--radius-full);
+    font-size: var(--font-xs);
+    font-weight: var(--weight-medium);
+    text-transform: capitalize;
 }
 
 .registro-intensidade.leve {
-    background: rgba(34, 197, 94, 0.2);
-    color: #86efac;
+    background: var(--success-100);
+    color: var(--success-text);
 }
 
 .registro-intensidade.moderada {
-    background: rgba(245, 158, 11, 0.2);
-    color: #fbbf24;
+    background: var(--warning-100);
+    color: var(--warning-text);
 }
 
 .registro-intensidade.intensa {
-    background: rgba(239, 68, 68, 0.2);
-    color: #ff8787;
+    background: var(--danger-100);
+    color: var(--danger-text);
 }
 
 .registro-duracao {
-    font-weight: 600;
-    color: var(--primary-color);
-    font-size: 1.1rem;
+    font-weight: var(--weight-semibold);
+    color: var(--primary-400);
+    font-size: var(--font-md);
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
-/* Responsivo */
+/* ── Registro Action Buttons ───────────────────────────────────────────────── */
+.registro-actions {
+    display: flex;
+    gap: var(--space-1);
+    align-items: center;
+    flex-shrink: 0;
+    margin-left: var(--space-3);
+}
+
+.btn-registro-edit,
+.btn-registro-del {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: transparent;
+    border: none;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: all var(--transition);
+}
+
+.btn-registro-edit:hover {
+    background: rgba(148, 163, 184, 0.08);
+    color: var(--text-primary);
+}
+
+.btn-registro-del:hover {
+    background: var(--danger-50);
+    color: var(--danger-text);
+}
+
+/* ── Responsive ────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
     .fichas-container {
         grid-template-columns: 1fr;
     }
 
-    .registros-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1rem;
+    .registros-header select {
+        width: 100%;
     }
 
-    .stats-box {
-        grid-template-columns: 1fr;
-    }
-
+    /* Keep registro-item as a single row on mobile — actions always visible */
     .registro-item {
-        flex-direction: column;
-        align-items: flex-start;
+        flex-direction: row;
+        align-items: center;
+        padding: var(--space-3) var(--space-4);
+        gap: var(--space-2);
+    }
+
+    .registro-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .registro-data {
+        font-size: var(--font-sm);
+    }
+
+    .registro-duracao {
+        font-size: var(--font-sm);
     }
 
     .registro-meta {
-        margin-top: 0.5rem;
+        flex-wrap: wrap;
+        gap: var(--space-2);
+    }
+
+    /* Always visible on touch devices */
+    .registro-actions {
+        opacity: 1;
+        margin-left: var(--space-2);
+    }
+
+    .btn-registro-edit,
+    .btn-registro-del {
+        width: 32px;
+        height: 32px;
     }
 
     .tabs-section {
@@ -455,7 +377,12 @@
 
     .tab-btn {
         flex: 1;
-        padding: 0.625rem;
-        font-size: 0.9rem;
+        text-align: center;
+        padding: var(--space-3);
+        font-size: var(--font-sm);
+    }
+
+    .ficha-actions {
+        flex-direction: column;
     }
 }

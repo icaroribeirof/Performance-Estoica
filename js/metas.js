@@ -28,7 +28,13 @@ function exibirMetas(metas) {
 
     let metasFiltradas = metas;
     if (filtroAtual !== 'todas') {
-        metasFiltradas = metas.filter(m => m.status === filtroAtual);
+        metasFiltradas = metas.filter(m => {
+            const progresso = calcularProgressoData(m.data_inicio, m.data_termino);
+            const statusEfetivo = m.status === 'cancelada' ? 'cancelada'
+                                : progresso >= 100 ? 'concluida'
+                                : 'em_progresso';
+            return statusEfetivo === filtroAtual;
+        });
     }
 
     if (metasFiltradas.length === 0) {
@@ -36,11 +42,10 @@ function exibirMetas(metas) {
         return;
     }
 
-    metasFiltradas.forEach(meta => {
+    metasFiltradas.forEach((meta, index) => {
         const dias = calcularDiasRestantes(meta.data_termino);
         const progressoCalculado = calcularProgressoData(meta.data_inicio, meta.data_termino);
 
-        // Derivar status automaticamente do progresso temporal (cancelada é preservada)
         const statusEfetivo = meta.status === 'cancelada' ? 'cancelada'
                             : progressoCalculado >= 100    ? 'concluida'
                             : 'em_progresso';
@@ -48,8 +53,11 @@ function exibirMetas(metas) {
                           : statusEfetivo === 'concluida'   ? 'Concluída'
                           : 'Cancelada';
 
+        const diasTexto = dias > 0 ? `${dias} dias restantes` : statusEfetivo === 'concluida' ? 'Finalizada' : 'Vencida';
+
         const card = document.createElement('div');
-        card.className = 'meta-card';
+        card.className = 'meta-card stagger-item';
+        card.style.animationDelay = `${index * 50}ms`;
         card.innerHTML = `
             <div class="meta-header">
                 <h3 class="meta-title">${meta.titulo}</h3>
@@ -57,7 +65,9 @@ function exibirMetas(metas) {
             </div>
             ${meta.descricao ? `<p class="meta-descricao">${meta.descricao}</p>` : ''}
             <div class="meta-data">
-                Início: ${formatarData(meta.data_inicio)} • Término: ${formatarData(meta.data_termino)} • ${dias > 0 ? `${dias} dias` : statusEfetivo === 'concluida' ? 'Finalizada' : 'Vencida'}
+                <span>Início: ${formatarData(meta.data_inicio)}</span>
+                <span> · Término: ${formatarData(meta.data_termino)}</span>
+                <span> · ${diasTexto}</span>
             </div>
             <div class="meta-progress">
                 <div class="progress-label">
@@ -65,15 +75,27 @@ function exibirMetas(metas) {
                     <span>${progressoCalculado}%</span>
                 </div>
                 <div class="progress-bar">
-                    <div class="progress-fill" style="width: ${progressoCalculado}%"></div>
+                    <div class="progress-fill" style="width: 0%"></div>
                 </div>
             </div>
             <div class="meta-actions">
-                <button class="btn btn-secondary btn-small" onclick="abrirModalEdicaoCompleta(${meta.id})">Editar</button>
-                <button class="btn btn-danger btn-small" onclick="deletarMeta(${meta.id})">Deletar</button>
+                <button class="btn btn-secondary btn-small" onclick="abrirModalEdicaoCompleta(${meta.id})">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                    Editar
+                </button>
+                <button class="btn btn-danger btn-small" onclick="deletarMeta(${meta.id})">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                    Deletar
+                </button>
             </div>
         `;
         container.appendChild(card);
+
+        // Animate progress bar after rendering
+        requestAnimationFrame(() => {
+            const fill = card.querySelector('.progress-fill');
+            if (fill) fill.style.width = `${progressoCalculado}%`;
+        });
     });
 }
 
@@ -106,12 +128,12 @@ function configurarModal() {
         salvarNovaMetadata();
     });
 
-    // Data hoje como padrão (usando data local para evitar problema de fuso horário)
+    // Data hoje como padrão
     const hoje = new Date();
     const hojeLocal = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
     document.getElementById('dataInicio').value = hojeLocal;
 
-    // Configurar Modal Edição Completa
+    // Configurar Modal Edição
     const modalEdit = document.getElementById('modalEditarMetaOverlay');
     const btnFecharEdit = modalEdit.querySelector('.modal-close');
     const formEdit = document.getElementById('formEditarMetaForm');
@@ -134,12 +156,15 @@ function salvarNovaMetadata() {
     const dataInicio = document.getElementById('dataInicio').value;
     const dataTermino = document.getElementById('dataTermino').value;
     const mensagemErro = document.getElementById('mensagemErroModal');
+    const botao = document.querySelector('#formNovaMetaForm button[type="submit"]');
 
     if (!titulo || !dataInicio || !dataTermino) {
         mensagemErro.classList.add('ativo');
         mensagemErro.textContent = 'Preencha os campos obrigatórios';
         return;
     }
+
+    if (botao) { botao.disabled = true; botao.innerHTML = '<span class="btn-spinner"></span> Criando...'; }
 
     const formData = new FormData();
     formData.append('titulo', titulo);
@@ -148,10 +173,7 @@ function salvarNovaMetadata() {
     formData.append('data_inicio', dataInicio);
     formData.append('data_termino', dataTermino);
 
-    fetch('api/metas.php?acao=adicionar', {
-        method: 'POST',
-        body: formData
-    })
+    fetch('api/metas.php?acao=adicionar', { method: 'POST', body: formData })
     .then(response => response.json())
     .then(data => {
         if (data.sucesso) {
@@ -162,6 +184,9 @@ function salvarNovaMetadata() {
             mensagemErro.classList.add('ativo');
             mensagemErro.textContent = data.mensagem;
         }
+    })
+    .finally(() => {
+        if (botao) { botao.disabled = false; botao.textContent = 'Criar Meta'; }
     });
 }
 
@@ -187,6 +212,9 @@ function salvarEdicaoCompletaMeta() {
     const dataInicio = document.getElementById('edit_meta_dataInicio').value;
     const dataTermino = document.getElementById('edit_meta_dataTermino').value;
     const mensagemErro = document.getElementById('mensagemErroModalEdit');
+    const botao = document.querySelector('#formEditarMetaForm button[type="submit"]');
+
+    if (botao) { botao.disabled = true; botao.innerHTML = '<span class="btn-spinner"></span> Salvando...'; }
 
     const formData = new FormData();
     formData.append('id', id);
@@ -196,10 +224,7 @@ function salvarEdicaoCompletaMeta() {
     formData.append('data_inicio', dataInicio);
     formData.append('data_termino', dataTermino);
 
-    fetch('api/metas.php?acao=editar', {
-        method: 'POST',
-        body: formData
-    })
+    fetch('api/metas.php?acao=editar', { method: 'POST', body: formData })
     .then(response => response.json())
     .then(data => {
         if (data.sucesso) {
@@ -209,29 +234,23 @@ function salvarEdicaoCompletaMeta() {
             mensagemErro.classList.add('ativo');
             mensagemErro.textContent = data.mensagem;
         }
+    })
+    .finally(() => {
+        if (botao) { botao.disabled = false; botao.textContent = 'Salvar Alterações'; }
     });
 }
 
 function calcularProgressoData(dataInicio, dataTermino) {
     if (!dataInicio || !dataTermino) return 0;
-    
-    const hoje = new Date();
-    hoje.setHours(0, 0, 0, 0);
-    
-    const inicio = new Date(dataInicio + 'T00:00:00');
-    inicio.setHours(0, 0, 0, 0);
-    
-    const termino = new Date(dataTermino + 'T00:00:00');
-    termino.setHours(0, 0, 0, 0);
-    
+    const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
+    const inicio = new Date(dataInicio + 'T00:00:00'); inicio.setHours(0, 0, 0, 0);
+    const termino = new Date(dataTermino + 'T00:00:00'); termino.setHours(0, 0, 0, 0);
     if (inicio > termino) return 0;
     if (hoje < inicio) return 0;
     if (hoje >= termino) return 100;
-    
     const msPorDia = 1000 * 60 * 60 * 24;
     const totalDias = Math.round((termino - inicio) / msPorDia) + 1;
     const diasPassados = Math.round((hoje - inicio) / msPorDia) + 1;
-    
     return Math.round((diasPassados / totalDias) * 100);
 }
 
@@ -242,17 +261,9 @@ function deletarMeta(metaId) {
         function() {
             const formData = new FormData();
             formData.append('id', metaId);
-
-            fetch('api/metas.php?acao=deletar', {
-                method: 'POST',
-                body: formData
-            })
+            fetch('api/metas.php?acao=deletar', { method: 'POST', body: formData })
             .then(response => response.json())
-            .then(data => {
-                if (data.sucesso) {
-                    carregarMetas();
-                }
-            });
+            .then(data => { if (data.sucesso) carregarMetas(); });
         }
     );
 }
@@ -260,8 +271,7 @@ function deletarMeta(metaId) {
 function calcularDiasRestantes(data) {
     const hoje = new Date();
     const termino = new Date(data);
-    const diferenca = termino - hoje;
-    return Math.ceil(diferenca / (1000 * 60 * 60 * 24));
+    return Math.ceil((termino - hoje) / (1000 * 60 * 60 * 24));
 }
 
 function formatarData(data) {
@@ -269,8 +279,7 @@ function formatarData(data) {
     const partes = data.split('-');
     if (partes.length < 3) return data;
     const [ano, mes, dia] = partes;
-    const diaLimpo = dia.substring(0, 2);
-    return `${diaLimpo}/${mes}/${ano}`;
+    return `${dia.substring(0, 2)}/${mes}/${ano}`;
 }
 
 function configurarLogout() {
@@ -279,14 +288,10 @@ function configurarLogout() {
             'Sair da conta',
             'Deseja sair da sua conta?',
             function() {
-                fetch('api/auth.php?acao=logout', {
-                    method: 'POST'
-                })
-                .then(() => {
-                    window.location.href = 'login.php';
-                });
+                fetch('api/auth.php?acao=logout', { method: 'POST' })
+                .then(() => { window.location.href = 'login.php'; });
             },
-            '🚪'
+            '👋'
         );
     });
 }

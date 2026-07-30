@@ -1,42 +1,38 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const btnMobileMenu = document.getElementById('btnMobileMenu');
+// Menu JavaScript — Mobile sidebar toggle
+
+document.addEventListener('DOMContentLoaded', function() {
     const sidebar = document.querySelector('.sidebar');
     const overlay = document.getElementById('sidebarOverlay');
+    const btnMenu = document.getElementById('btnMobileMenu');
 
-    if (btnMobileMenu && sidebar && overlay) {
-        btnMobileMenu.addEventListener('click', () => {
-            sidebar.classList.toggle('ativo');
-            overlay.classList.toggle('ativo');
-        });
+    if (!sidebar || !overlay || !btnMenu) return;
 
-        overlay.addEventListener('click', () => {
-            sidebar.classList.remove('ativo');
-            overlay.classList.remove('ativo');
-        });
+    function abrirMenu() {
+        sidebar.classList.add('ativo');
+        overlay.classList.add('ativo');
+        document.body.style.overflow = 'hidden';
     }
-    
-    const navItems = document.querySelectorAll('.nav-item');
-    navItems.forEach(item => {
-        item.addEventListener('click', () => {
-            if (window.innerWidth <= 1024) {
-                sidebar.classList.remove('ativo');
-                if (overlay) overlay.classList.remove('ativo');
-            }
-        });
+
+    function fecharMenu() {
+        sidebar.classList.remove('ativo');
+        overlay.classList.remove('ativo');
+        document.body.style.overflow = '';
+    }
+
+    btnMenu.addEventListener('click', abrirMenu);
+    overlay.addEventListener('click', fecharMenu);
+
+    // Close on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && sidebar.classList.contains('ativo')) {
+            fecharMenu();
+        }
     });
 
-    // Prevent body scroll when any modal is open
-    const observer = new MutationObserver((mutations) => {
-        let anyModalOpen = false;
-        document.querySelectorAll('.modal-overlay').forEach(modal => {
-            if (modal.classList.contains('ativo')) {
-                anyModalOpen = true;
-            }
-        });
-        document.body.style.overflow = anyModalOpen ? 'hidden' : '';
-    });
-
-    document.querySelectorAll('.modal-overlay').forEach(modal => {
-        observer.observe(modal, { attributes: true, attributeFilter: ['class'] });
+    // Close on window resize if desktop
+    window.addEventListener('resize', function() {
+        if (window.innerWidth > 1024 && sidebar.classList.contains('ativo')) {
+            fecharMenu();
+        }
     });
 });

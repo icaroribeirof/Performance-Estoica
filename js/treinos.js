@@ -12,13 +12,23 @@ const ORDEM_DIAS = {
 
 let fichasCarregadas = [];
 
+// SVG icon templates
+const ICONS = {
+    calendar: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+    plus: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>',
+    edit: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>',
+    trash: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>',
+    weight: '<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>',
+    timer: '<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'
+};
+
 document.addEventListener('DOMContentLoaded', function() {
     carregarFichas();
     configurarModals();
     configurarTabs();
     configurarLogout();
-    preencherMeses();      // popula o select primeiro
-    carregarRegistros();   // só então lê o mês selecionado
+    preencherMeses();
+    carregarRegistros();
 });
 
 function carregarFichas() {
@@ -26,7 +36,6 @@ function carregarFichas() {
         .then(response => response.json())
         .then(data => {
             if (data.sucesso) {
-                // Ordenar por dia da semana (Segunda → Domingo)
                 const fichasOrdenadas = [...data.dados].sort((a, b) => {
                     const ordemA = ORDEM_DIAS[a.dias_semana] ?? 99;
                     const ordemB = ORDEM_DIAS[b.dias_semana] ?? 99;
@@ -49,25 +58,32 @@ function exibirFichas(fichas) {
         return;
     }
 
-    fichas.forEach(ficha => {
+    fichas.forEach((ficha, index) => {
         const card = document.createElement('div');
-        card.className = 'ficha-card';
+        card.className = 'ficha-card stagger-item';
+        card.style.animationDelay = `${index * 60}ms`;
         card.innerHTML = `
             <div class="ficha-header">
                 <h3 class="ficha-titulo">${ficha.nome}</h3>
-                <p class="ficha-dias">📅 ${ficha.dias_semana || 'Sem dias definidos'}</p>
+                <p class="ficha-dias">${ICONS.calendar} ${ficha.dias_semana || 'Sem dia definido'}</p>
             </div>
             <p class="ficha-descricao">${ficha.descricao || 'Sem descrição'}</p>
             <div class="exercicios-list">
                 <h4>Exercícios</h4>
                 <div id="exercicios-${ficha.id}" class="exercicios-content">
-                    <p class="text-empty">Carregando...</p>
+                    <p class="text-empty" style="padding: var(--space-4) 0;">Carregando...</p>
                 </div>
             </div>
             <div class="ficha-actions">
-                <button class="btn btn-primary btn-small" onclick="abrirModalAdicionarExercicio(${ficha.id})">Adicionar Exercício</button>
-                <button class="btn btn-secondary btn-small" onclick="abrirModalEdicaoFicha(${ficha.id})">Editar</button>
-                <button class="btn btn-danger btn-small" onclick="deletarFicha(${ficha.id})">Deletar</button>
+                <button class="btn btn-primary btn-small" onclick="abrirModalAdicionarExercicio(${ficha.id})">
+                    ${ICONS.plus} Exercício
+                </button>
+                <button class="btn btn-secondary btn-small" onclick="abrirModalEdicaoFicha(${ficha.id})">
+                    ${ICONS.edit} Editar
+                </button>
+                <button class="btn btn-danger btn-small" onclick="deletarFicha(${ficha.id})">
+                    ${ICONS.trash} Deletar
+                </button>
             </div>
         `;
         container.appendChild(card);
@@ -90,7 +106,7 @@ function exibirExercicios(fichaId, exercicios) {
     container.innerHTML = '';
 
     if (exercicios.length === 0) {
-        container.innerHTML = '<p class="text-empty">Nenhum exercício adicionado</p>';
+        container.innerHTML = '<p class="text-empty" style="padding: var(--space-4) 0;">Nenhum exercício adicionado</p>';
         return;
     }
 
@@ -100,8 +116,8 @@ function exibirExercicios(fichaId, exercicios) {
 
         const detalhes = [
             `${exercicio.series}x${exercicio.repeticoes}`,
-            exercicio.peso   ? `💪 ${exercicio.peso}`          : null,
-            exercicio.descanso > 0 ? `⏱ ${exercicio.descanso}s` : null,
+            exercicio.peso   ? `${exercicio.peso}` : null,
+            exercicio.descanso > 0 ? `${exercicio.descanso}s descanso` : null,
         ].filter(Boolean).join(' · ');
 
         item.innerHTML = `
@@ -111,8 +127,8 @@ function exibirExercicios(fichaId, exercicios) {
                 ${exercicio.notas ? `<span class="exercicio-notas">${exercicio.notas}</span>` : ''}
             </div>
             <div class="exercicio-actions">
-                <button class="btn-exercicio-edit" title="Editar">✏️</button>
-                <button class="btn-exercicio-del" onclick="deletarExercicio(${exercicio.id}, ${fichaId})" title="Remover">🗑️</button>
+                <button class="btn-exercicio-edit" title="Editar">${ICONS.edit}</button>
+                <button class="btn-exercicio-del" onclick="deletarExercicio(${exercicio.id}, ${fichaId})" title="Remover">${ICONS.trash}</button>
             </div>
         `;
         const btnEdit = item.querySelector('.btn-exercicio-edit');
@@ -176,18 +192,22 @@ function carregarRegistros() {
         });
 }
 
+let registrosCarregados = [];
+
 function exibirRegistros(registros) {
     const container = document.getElementById('registrosContainer');
     container.innerHTML = '';
+    registrosCarregados = registros;
 
     if (registros.length === 0) {
         container.innerHTML = '<p class="text-empty">Nenhum treino registrado neste período</p>';
         return;
     }
 
-    registros.forEach(registro => {
+    registros.forEach((registro, index) => {
         const item = document.createElement('div');
-        item.className = 'registro-item';
+        item.className = 'registro-item stagger-item';
+        item.style.animationDelay = `${index * 40}ms`;
         item.innerHTML = `
             <div class="registro-info">
                 <div class="registro-data">${formatarData(registro.data_treino)}</div>
@@ -197,8 +217,19 @@ function exibirRegistros(registros) {
                 </div>
             </div>
             <div class="registro-duracao">${registro.duracao_minutos} min</div>
+            <div class="registro-actions">
+                <button class="btn-registro-edit" title="Editar" data-id="${registro.id}">${ICONS.edit}</button>
+                <button class="btn-registro-del" title="Deletar" data-id="${registro.id}">${ICONS.trash}</button>
+            </div>
         `;
         container.appendChild(item);
+    });
+
+    container.querySelectorAll('.btn-registro-edit').forEach(btn => {
+        btn.addEventListener('click', () => abrirModalEdicaoRegistro(parseInt(btn.dataset.id)));
+    });
+    container.querySelectorAll('.btn-registro-del').forEach(btn => {
+        btn.addEventListener('click', () => deletarRegistro(parseInt(btn.dataset.id)));
     });
 }
 
@@ -270,7 +301,7 @@ function configurarModals() {
         salvarRegistroTreino();
     });
 
-    // Data hoje como padrão (usando data local para evitar problema de fuso horário)
+    // Data hoje como padrão
     const dataTreino = document.getElementById('dataTreino');
     if (dataTreino) {
         const hoje = new Date();
@@ -321,6 +352,23 @@ function configurarModals() {
         e.preventDefault();
         salvarEdicaoExercicio();
     });
+
+    // Modal Editar Registro
+    const modalEditRegistro = document.getElementById('modalEditarRegistroOverlay');
+    if (modalEditRegistro) {
+        const btnFecharEditRegistro = modalEditRegistro.querySelector('.modal-close');
+        const formEditRegistro = document.getElementById('formEditarRegistroForm');
+
+        btnFecharEditRegistro.addEventListener('click', () => modalEditRegistro.classList.remove('ativo'));
+        modalEditRegistro.addEventListener('click', (e) => {
+            if (e.target === modalEditRegistro) modalEditRegistro.classList.remove('ativo');
+        });
+
+        formEditRegistro.addEventListener('submit', function(e) {
+            e.preventDefault();
+            salvarEdicaoRegistro();
+        });
+    }
 }
 
 function salvarNovaFicha() {
@@ -328,6 +376,7 @@ function salvarNovaFicha() {
     const descricao = document.getElementById('fichadescricao').value;
     const dias = document.getElementById('fichadias').value;
     const mensagemErro = document.getElementById('mensagemErroModalFicha');
+    const botao = document.querySelector('#formNovaFichaForm button[type="submit"]');
 
     if (!nome) {
         mensagemErro.classList.add('ativo');
@@ -335,15 +384,14 @@ function salvarNovaFicha() {
         return;
     }
 
+    if (botao) { botao.disabled = true; botao.innerHTML = '<span class="btn-spinner"></span> Criando...'; }
+
     const formData = new FormData();
     formData.append('nome', nome);
     formData.append('descricao', descricao);
     formData.append('dias_semana', dias);
 
-    fetch('api/treinos.php?acao=criar_ficha', {
-        method: 'POST',
-        body: formData
-    })
+    fetch('api/treinos.php?acao=criar_ficha', { method: 'POST', body: formData })
     .then(response => response.json())
     .then(data => {
         if (data.sucesso) {
@@ -354,6 +402,9 @@ function salvarNovaFicha() {
             mensagemErro.classList.add('ativo');
             mensagemErro.textContent = data.mensagem;
         }
+    })
+    .finally(() => {
+        if (botao) { botao.disabled = false; botao.textContent = 'Criar Ficha'; }
     });
 }
 
@@ -364,12 +415,15 @@ function salvarRegistroTreino() {
     const intensidade = document.getElementById('intensidade').value;
     const notas = document.getElementById('notasTreino').value;
     const mensagemErro = document.getElementById('mensagemErroModalTreino');
+    const botao = document.querySelector('#formRegistroTreinoForm button[type="submit"]');
 
     if (!fichaId || !dataTreino || !duracao) {
         mensagemErro.classList.add('ativo');
         mensagemErro.textContent = 'Preencha todos os campos obrigatórios';
         return;
     }
+
+    if (botao) { botao.disabled = true; botao.innerHTML = '<span class="btn-spinner"></span> Registrando...'; }
 
     const formData = new FormData();
     formData.append('ficha_id', fichaId);
@@ -378,10 +432,7 @@ function salvarRegistroTreino() {
     formData.append('intensidade', intensidade);
     formData.append('notas', notas);
 
-    fetch('api/treinos.php?acao=registrar_treino', {
-        method: 'POST',
-        body: formData
-    })
+    fetch('api/treinos.php?acao=registrar_treino', { method: 'POST', body: formData })
     .then(response => response.json())
     .then(data => {
         if (data.sucesso) {
@@ -392,6 +443,9 @@ function salvarRegistroTreino() {
             mensagemErro.classList.add('ativo');
             mensagemErro.textContent = data.mensagem;
         }
+    })
+    .finally(() => {
+        if (botao) { botao.disabled = false; botao.textContent = 'Registrar Treino'; }
     });
 }
 
@@ -413,6 +467,7 @@ function salvarEdicaoFicha() {
     const descricao = document.getElementById('edit_fichadescricao').value;
     const dias = document.getElementById('edit_fichadias').value;
     const mensagemErro = document.getElementById('mensagemErroModalFichaEdit');
+    const botao = document.querySelector('#formEditarFichaForm button[type="submit"]');
 
     if (!nome) {
         mensagemErro.classList.add('ativo');
@@ -420,16 +475,15 @@ function salvarEdicaoFicha() {
         return;
     }
 
+    if (botao) { botao.disabled = true; botao.innerHTML = '<span class="btn-spinner"></span> Salvando...'; }
+
     const formData = new FormData();
     formData.append('id', id);
     formData.append('nome', nome);
     formData.append('descricao', descricao);
     formData.append('dias_semana', dias);
 
-    fetch('api/treinos.php?acao=editar_ficha', {
-        method: 'POST',
-        body: formData
-    })
+    fetch('api/treinos.php?acao=editar_ficha', { method: 'POST', body: formData })
     .then(response => response.json())
     .then(data => {
         if (data.sucesso) {
@@ -439,15 +493,16 @@ function salvarEdicaoFicha() {
             mensagemErro.classList.add('ativo');
             mensagemErro.textContent = data.mensagem;
         }
+    })
+    .finally(() => {
+        if (botao) { botao.disabled = false; botao.textContent = 'Salvar Alterações'; }
     });
 }
 
 function abrirModalAdicionarExercicio(fichaId) {
-    // Limpar form e erro
     document.getElementById('formAdicionarExercicioForm').reset();
     document.getElementById('mensagemErroModalExercicio').classList.remove('ativo');
     document.getElementById('mensagemErroModalExercicio').textContent = '';
-    // Guardar a qual ficha pertence
     document.getElementById('exercicio_ficha_id').value = fichaId;
     document.getElementById('modalAdicionarExercicioOverlay').classList.add('ativo');
 }
@@ -461,12 +516,15 @@ function salvarExercicio() {
     const descanso  = document.getElementById('exercicioDescanso').value;
     const notas     = document.getElementById('exercicioNotas').value.trim();
     const mensagemErro = document.getElementById('mensagemErroModalExercicio');
+    const botao     = document.querySelector('#formAdicionarExercicioForm button[type="submit"]');
 
     if (!nome || !series || !reps) {
         mensagemErro.classList.add('ativo');
         mensagemErro.textContent = 'Preencha os campos obrigatórios (nome, séries e repetições)';
         return;
     }
+
+    if (botao) { botao.disabled = true; botao.innerHTML = '<span class="btn-spinner"></span> Adicionando...'; }
 
     const formData = new FormData();
     formData.append('ficha_id',    fichaId);
@@ -477,10 +535,7 @@ function salvarExercicio() {
     formData.append('descanso',    descanso || 0);
     formData.append('notas',       notas);
 
-    fetch('api/treinos.php?acao=adicionar_exercicio', {
-        method: 'POST',
-        body: formData
-    })
+    fetch('api/treinos.php?acao=adicionar_exercicio', { method: 'POST', body: formData })
     .then(r => r.json())
     .then(data => {
         if (data.sucesso) {
@@ -494,6 +549,9 @@ function salvarExercicio() {
     .catch(() => {
         mensagemErro.classList.add('ativo');
         mensagemErro.textContent = 'Erro de comunicação com o servidor';
+    })
+    .finally(() => {
+        if (botao) { botao.disabled = false; botao.textContent = 'Adicionar Exercício'; }
     });
 }
 
@@ -523,12 +581,15 @@ function salvarEdicaoExercicio() {
     const descanso  = document.getElementById('edit_exercicioDescanso').value;
     const notas     = document.getElementById('edit_exercicioNotas').value.trim();
     const mensagemErro = document.getElementById('mensagemErroModalExercicioEdit');
+    const botao     = document.querySelector('#formEditarExercicioForm button[type="submit"]');
 
     if (!nome || !series || !reps) {
         mensagemErro.classList.add('ativo');
         mensagemErro.textContent = 'Preencha os campos obrigatórios (nome, séries e repetições)';
         return;
     }
+
+    if (botao) { botao.disabled = true; botao.innerHTML = '<span class="btn-spinner"></span> Salvando...'; }
 
     const formData = new FormData();
     formData.append('id',          id);
@@ -539,10 +600,7 @@ function salvarEdicaoExercicio() {
     formData.append('descanso',    descanso || 0);
     formData.append('notas',       notas);
 
-    fetch('api/treinos.php?acao=editar_exercicio', {
-        method: 'POST',
-        body: formData
-    })
+    fetch('api/treinos.php?acao=editar_exercicio', { method: 'POST', body: formData })
     .then(r => r.json())
     .then(data => {
         if (data.sucesso) {
@@ -556,6 +614,9 @@ function salvarEdicaoExercicio() {
     .catch(() => {
         mensagemErro.classList.add('ativo');
         mensagemErro.textContent = 'Erro de comunicação com o servidor';
+    })
+    .finally(() => {
+        if (botao) { botao.disabled = false; botao.textContent = 'Salvar Alterações'; }
     });
 }
 
@@ -566,19 +627,10 @@ function deletarExercicio(exercicioId, fichaId) {
         function() {
             const formData = new FormData();
             formData.append('id', exercicioId);
-
-            fetch('api/treinos.php?acao=deletar_exercicio', {
-                method: 'POST',
-                body: formData
-            })
+            fetch('api/treinos.php?acao=deletar_exercicio', { method: 'POST', body: formData })
             .then(r => r.json())
-            .then(data => {
-                if (data.sucesso) {
-                    carregarExercicios(fichaId);
-                }
-            });
-        },
-        '⚠️'
+            .then(data => { if (data.sucesso) carregarExercicios(fichaId); });
+        }
     );
 }
 
@@ -589,17 +641,9 @@ function deletarFicha(fichaId) {
         function() {
             const formData = new FormData();
             formData.append('id', fichaId);
-
-            fetch('api/treinos.php?acao=deletar_ficha', {
-                method: 'POST',
-                body: formData
-            })
+            fetch('api/treinos.php?acao=deletar_ficha', { method: 'POST', body: formData })
             .then(r => r.json())
-            .then(data => {
-                if (data.sucesso) {
-                    carregarFichas();
-                }
-            });
+            .then(data => { if (data.sucesso) carregarFichas(); });
         }
     );
 }
@@ -608,10 +652,8 @@ function configurarTabs() {
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             const tabName = this.dataset.tab;
-            
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('ativo'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('ativo'));
-            
             this.classList.add('ativo');
             document.getElementById(`tab-${tabName}`).classList.add('ativo');
         });
@@ -633,14 +675,97 @@ function configurarLogout() {
             'Sair da conta',
             'Deseja sair da sua conta?',
             function() {
-                fetch('api/auth.php?acao=logout', {
-                    method: 'POST'
-                })
-                .then(() => {
-                    window.location.href = 'login.php';
-                });
+                fetch('api/auth.php?acao=logout', { method: 'POST' })
+                .then(() => { window.location.href = 'login.php'; });
             },
-            '🚪'
+            '👋'
         );
     });
+}
+
+// ─── EDIT/DELETE REGISTRO ─────────────────────────────────────────────────────
+
+function abrirModalEdicaoRegistro(id) {
+    const registro = registrosCarregados.find(r => r.id == id);
+    if (!registro) return;
+
+    document.getElementById('edit_registro_id').value = registro.id;
+    document.getElementById('edit_registro_data').value = registro.data_treino;
+    document.getElementById('edit_registro_duracao').value = registro.duracao_minutos;
+    document.getElementById('edit_registro_intensidade').value = registro.intensidade;
+    document.getElementById('edit_registro_notas').value = registro.notas || '';
+
+    // Populate ficha select
+    const select = document.getElementById('edit_registro_ficha');
+    select.innerHTML = '<option value="">Escolha uma ficha</option>';
+    fichasCarregadas.forEach(ficha => {
+        const option = document.createElement('option');
+        option.value = ficha.id;
+        option.textContent = ficha.nome;
+        if (ficha.id == registro.ficha_id) option.selected = true;
+        select.appendChild(option);
+    });
+
+    document.getElementById('mensagemErroModalRegistroEdit')?.classList.remove('ativo');
+    document.getElementById('modalEditarRegistroOverlay').classList.add('ativo');
+}
+
+function salvarEdicaoRegistro() {
+    const id = document.getElementById('edit_registro_id').value;
+    const fichaId = document.getElementById('edit_registro_ficha').value;
+    const dataTreino = document.getElementById('edit_registro_data').value;
+    const duracao = document.getElementById('edit_registro_duracao').value;
+    const intensidade = document.getElementById('edit_registro_intensidade').value;
+    const notas = document.getElementById('edit_registro_notas').value;
+    const mensagemErro = document.getElementById('mensagemErroModalRegistroEdit');
+    const botao = document.querySelector('#formEditarRegistroForm button[type="submit"]');
+
+    if (!fichaId || !dataTreino || !duracao) {
+        mensagemErro.classList.add('ativo');
+        mensagemErro.textContent = 'Preencha todos os campos obrigatórios';
+        return;
+    }
+
+    if (botao) { botao.disabled = true; botao.innerHTML = '<span class="btn-spinner"></span> Salvando...'; }
+
+    const formData = new FormData();
+    formData.append('id', id);
+    formData.append('ficha_id', fichaId);
+    formData.append('data_treino', dataTreino);
+    formData.append('duracao_minutos', duracao);
+    formData.append('intensidade', intensidade);
+    formData.append('notas', notas);
+
+    fetch('api/treinos.php?acao=editar_registro', { method: 'POST', body: formData })
+    .then(r => r.json())
+    .then(data => {
+        if (data.sucesso) {
+            document.getElementById('modalEditarRegistroOverlay').classList.remove('ativo');
+            carregarRegistros();
+        } else {
+            mensagemErro.classList.add('ativo');
+            mensagemErro.textContent = data.mensagem || 'Erro ao salvar';
+        }
+    })
+    .catch(() => {
+        mensagemErro.classList.add('ativo');
+        mensagemErro.textContent = 'Erro de comunicação com o servidor';
+    })
+    .finally(() => {
+        if (botao) { botao.disabled = false; botao.textContent = 'Salvar Alterações'; }
+    });
+}
+
+function deletarRegistro(registroId) {
+    confirmarAcao(
+        'Deletar Registro',
+        'Deseja remover este registro de treino? Esta ação não pode ser desfeita.',
+        function() {
+            const formData = new FormData();
+            formData.append('id', registroId);
+            fetch('api/treinos.php?acao=deletar_registro', { method: 'POST', body: formData })
+            .then(r => r.json())
+            .then(data => { if (data.sucesso) carregarRegistros(); });
+        }
+    );
 }

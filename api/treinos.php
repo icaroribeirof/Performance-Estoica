@@ -128,7 +128,7 @@ elseif ($acao === 'listar_registros') {
     $mes = (int)($_GET['mes'] ?? date('m'));
     $ano = (int)($_GET['ano'] ?? date('Y'));
 
-    $stmt = $conexao->prepare("SELECT rt.id, rt.data_treino, rt.duracao_minutos, rt.intensidade, ft.nome FROM registros_treino rt JOIN fichas_treino ft ON rt.ficha_id = ft.id WHERE rt.usuario_id = ? AND MONTH(rt.data_treino) = ? AND YEAR(rt.data_treino) = ? ORDER BY rt.data_treino DESC");
+    $stmt = $conexao->prepare("SELECT rt.id, rt.ficha_id, rt.data_treino, rt.duracao_minutos, rt.intensidade, rt.notas, ft.nome FROM registros_treino rt JOIN fichas_treino ft ON rt.ficha_id = ft.id WHERE rt.usuario_id = ? AND MONTH(rt.data_treino) = ? AND YEAR(rt.data_treino) = ? ORDER BY rt.data_treino DESC");
     $stmt->bind_param("iii", $usuario_id, $mes, $ano);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -221,6 +221,46 @@ elseif ($acao === 'deletar_ficha') {
         echo json_encode(['sucesso' => true, 'mensagem' => 'Ficha deletada']);
     } else {
         echo json_encode(['sucesso' => false, 'mensagem' => 'Erro ao deletar ficha']);
+    }
+    $stmt->close();
+}
+
+elseif ($acao === 'editar_registro') {
+    $id = (int)($_POST['id'] ?? 0);
+    $ficha_id = (int)($_POST['ficha_id'] ?? 0);
+    $data_treino = $_POST['data_treino'] ?? '';
+    $duracao_minutos = (int)($_POST['duracao_minutos'] ?? 0);
+    $intensidade = sanitizar($_POST['intensidade'] ?? 'moderada');
+    $notas = sanitizar($_POST['notas'] ?? '');
+
+    if (empty($data_treino) || $duracao_minutos <= 0) {
+        echo json_encode(['sucesso' => false, 'mensagem' => 'Data e duração são obrigatórios']);
+        exit();
+    }
+
+    $stmt = $conexao->prepare(
+        "UPDATE registros_treino SET ficha_id = ?, data_treino = ?, duracao_minutos = ?, intensidade = ?, notas = ? WHERE id = ? AND usuario_id = ?"
+    );
+    $stmt->bind_param("isiisii", $ficha_id, $data_treino, $duracao_minutos, $intensidade, $notas, $id, $usuario_id);
+
+    if ($stmt->execute() && $stmt->affected_rows >= 0) {
+        echo json_encode(['sucesso' => true, 'mensagem' => 'Registro atualizado com sucesso']);
+    } else {
+        echo json_encode(['sucesso' => false, 'mensagem' => 'Erro ao atualizar registro']);
+    }
+    $stmt->close();
+}
+
+elseif ($acao === 'deletar_registro') {
+    $id = (int)($_POST['id'] ?? 0);
+
+    $stmt = $conexao->prepare("DELETE FROM registros_treino WHERE id = ? AND usuario_id = ?");
+    $stmt->bind_param("ii", $id, $usuario_id);
+
+    if ($stmt->execute() && $stmt->affected_rows > 0) {
+        echo json_encode(['sucesso' => true, 'mensagem' => 'Registro removido']);
+    } else {
+        echo json_encode(['sucesso' => false, 'mensagem' => 'Erro ao remover registro']);
     }
     $stmt->close();
 }

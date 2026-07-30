@@ -1,286 +1,164 @@
-/* Estilos para Modais */
-.modal-overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.7);
-    z-index: 2000;
-    align-items: center;
-    justify-content: center;
-    animation: fadeIn 0.3s ease-out;
-}
+/* ══════════════════════════════════════════════════════════════════════
+   Tarefas — Page-specific Styles (no duplication)
+   ══════════════════════════════════════════════════════════════════════ */
 
-.modal-overlay.ativo {
-    display: flex;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
-}
-
-.modal {
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 0.75rem;
-    padding: 2rem;
-    max-width: 500px;
-    width: 90%;
-    box-shadow: var(--shadow-xl);
-    animation: slideInUp 0.3s ease-out;
-}
-
-@keyframes slideInUp {
-    from {
-        transform: translateY(30px);
-        opacity: 0;
-    }
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
-}
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.modal-header h2 {
-    font-size: 1.5rem;
-    color: var(--text-primary);
-}
-
-.modal-close {
-    background: none;
-    border: none;
-    font-size: 2rem;
-    color: var(--text-secondary);
-    cursor: pointer;
-    transition: var(--transition);
-    padding: 0;
-    width: 2rem;
-    height: 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.modal-close:hover {
-    color: var(--text-primary);
-}
-
-/* Form Modal */
-.form-modal {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-}
-
-.form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-}
-
-.form-select {
-    width: 100%;
-    padding: 0.75rem;
-    background: rgba(15, 23, 42, 0.8);
-    border: 2px solid var(--border-color);
-    border-radius: 0.5rem;
-    color: var(--text-primary);
-    font-size: 1rem;
-    transition: var(--transition);
-    cursor: pointer;
-    appearance: none;
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f1f5f9' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-    background-repeat: no-repeat;
-    background-position: right 0.75rem center;
-    background-size: 1.2em 1.2em;
-    padding-right: 2.5rem;
-}
-
-.form-select option {
-    background: var(--card-bg);
-    color: var(--text-primary);
-    padding: 0.75rem;
-}
-
-.form-select:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    background-color: rgba(99, 102, 241, 0.15);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
-}
-
-/* Filtros */
-.filtros-section {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 2rem;
-    flex-wrap: wrap;
-}
-
-.filtro-btn {
-    padding: 0.625rem 1.25rem;
-    border: 2px solid var(--border-color);
-    background: transparent;
-    color: var(--text-secondary);
-    border-radius: 0.5rem;
-    cursor: pointer;
-    transition: var(--transition);
-    font-weight: 600;
-    font-size: 0.95rem;
-}
-
-.filtro-btn:hover {
-    border-color: var(--primary-color);
-    color: var(--primary-color);
-}
-
-.filtro-btn.ativo {
-    background: var(--primary-color);
-    border-color: var(--primary-color);
-    color: white;
-}
-
-/* Tarefas Específico */
+/* ── Tarefas Container ─────────────────────────────────────────────── */
 .tarefas-container {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: var(--space-2);
 }
 
+/* ── Tarefa Item ───────────────────────────────────────────────────── */
 .tarefa-item {
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 0.75rem;
-    padding: 1.5rem;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4) var(--space-5);
     display: flex;
     align-items: center;
-    gap: 1rem;
-    transition: var(--transition);
+    gap: var(--space-4);
+    transition: all var(--transition);
 }
 
 .tarefa-item:hover {
-    border-color: var(--primary-color);
-    background: rgba(99, 102, 241, 0.05);
+    border-color: var(--border-hover);
+    background: rgba(99, 102, 241, 0.03);
 }
 
+/* Completed state */
 .tarefa-item.concluida {
-    opacity: 0.6;
+    opacity: 0.55;
 }
 
 .tarefa-item.concluida .tarefa-titulo {
     text-decoration: line-through;
-    color: var(--text-secondary);
+    color: var(--text-tertiary);
 }
 
+/* Late state */
+.tarefa-item.atrasada {
+    border-color: rgba(239, 68, 68, 0.25);
+}
+
+/* ── Custom Checkbox ───────────────────────────────────────────────── */
 .tarefa-checkbox {
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
     cursor: pointer;
-    accent-color: var(--primary-color);
+    accent-color: var(--primary-500);
     flex-shrink: 0;
+    border-radius: 4px;
 }
 
+/* ── Tarefa Content ────────────────────────────────────────────────── */
 .tarefa-content {
     flex: 1;
+    min-width: 0;
 }
 
 .tarefa-titulo {
-    font-size: 1.05rem;
-    font-weight: 600;
+    font-size: var(--font-base);
+    font-weight: var(--weight-medium);
     color: var(--text-primary);
-    margin-bottom: 0.25rem;
+    margin-bottom: var(--space-1);
+}
+
+.tarefa-descricao {
+    font-size: var(--font-sm);
+    color: var(--text-tertiary);
+    margin-bottom: var(--space-2);
+    line-height: var(--leading-relaxed);
 }
 
 .tarefa-meta {
     display: flex;
-    gap: 1rem;
-    font-size: 0.875rem;
-    color: var(--text-secondary);
+    gap: var(--space-3);
+    font-size: var(--font-sm);
+    color: var(--text-tertiary);
     flex-wrap: wrap;
+    align-items: center;
 }
 
+/* ── Priority Badge ────────────────────────────────────────────────── */
 .tarefa-prioridade {
-    display: inline-block;
-    padding: 0.25rem 0.625rem;
-    border-radius: 0.25rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    padding: 2px var(--space-2);
+    border-radius: var(--radius-full);
+    font-size: var(--font-xs);
+    font-weight: var(--weight-medium);
+    letter-spacing: var(--tracking-wide);
 }
 
 .tarefa-prioridade.alta {
-    background: rgba(239, 68, 68, 0.2);
-    color: #ff8787;
+    background: var(--danger-100);
+    color: var(--danger-text);
 }
 
 .tarefa-prioridade.media {
-    background: rgba(245, 158, 11, 0.2);
-    color: #fbbf24;
+    background: var(--warning-100);
+    color: var(--warning-text);
 }
 
 .tarefa-prioridade.baixa {
-    background: rgba(16, 185, 129, 0.2);
-    color: #6ee7b7;
+    background: var(--success-100);
+    color: var(--success-text);
 }
 
+/* ── Recurrence Badge ──────────────────────────────────────────────── */
+.tarefa-recorrencia {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    color: var(--text-tertiary);
+}
+
+/* ── Action Buttons ────────────────────────────────────────────────── */
 .tarefa-actions {
     display: flex;
-    gap: 0.5rem;
+    gap: var(--space-1);
     margin-left: auto;
+    flex-shrink: 0;
 }
 
 .tarefa-btn {
-    background: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: transparent;
     border: none;
-    color: var(--text-secondary);
+    color: var(--text-tertiary);
     cursor: pointer;
-    font-size: 1.25rem;
-    transition: var(--transition);
-    padding: 0.25rem;
+    border-radius: var(--radius-md);
+    transition: all var(--transition);
+    font-size: var(--font-md);
 }
 
 .tarefa-btn:hover {
-    color: var(--primary-color);
+    background: rgba(148, 163, 184, 0.08);
+    color: var(--text-primary);
 }
 
-@media (max-width: 768px) {
-    .form-row {
-        grid-template-columns: 1fr;
-    }
+.tarefa-btn.btn-deletar:hover {
+    background: var(--danger-50);
+    color: var(--danger-text);
+}
 
+/* ── Responsive ────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
     .tarefa-item {
         flex-direction: column;
         align-items: flex-start;
+        padding: var(--space-4);
+        gap: var(--space-3);
     }
 
     .tarefa-actions {
         margin-left: 0;
-        margin-top: 1rem;
         width: 100%;
-    }
-
-    .modal {
-        width: 95%;
-        padding: 1.5rem;
-    }
-
-    .tarefas-container {
-        gap: 0.75rem;
+        justify-content: flex-end;
     }
 }

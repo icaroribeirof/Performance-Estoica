@@ -7,11 +7,11 @@ verificarLogin();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tarefas — Performance Estoica</title>
+    <title>Calendário — Performance Estoica</title>
     <link rel="icon" type="image/svg+xml" href="icon/favicon.svg">
     <link rel="stylesheet" href="css/geral.css">
     <link rel="stylesheet" href="css/dashboard.css">
-    <link rel="stylesheet" href="css/tarefas.css">
+    <link rel="stylesheet" href="css/calendario.css">
     <link rel="stylesheet" href="css/confirm-modal.css">
 </head>
 <body>
@@ -34,7 +34,7 @@ verificarLogin();
                     <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg></span>
                     <span>Dashboard</span>
                 </a>
-                <a href="calendario.php" class="nav-item">
+                <a href="calendario.php" class="nav-item ativo">
                     <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
                     <span>Calendário</span>
                 </a>
@@ -42,7 +42,7 @@ verificarLogin();
                     <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>
                     <span>Metas</span>
                 </a>
-                <a href="tarefas.php" class="nav-item ativo">
+                <a href="tarefas.php" class="nav-item">
                     <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg></span>
                     <span>Tarefas</span>
                 </a>
@@ -66,66 +66,75 @@ verificarLogin();
                     <button id="btnMobileMenu" class="mobile-menu-btn" aria-label="Abrir menu">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
                     </button>
-                    <h1>Minhas Tarefas</h1>
+                    <h1>Calendário</h1>
                 </div>
-                <button id="btnNovaTarefaModal" class="btn btn-primary btn-small">
+                <button id="btnNovaTarefaCal" class="btn btn-primary btn-small">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
                     Nova Tarefa
                 </button>
             </header>
 
-            <!-- Filtros -->
-            <div class="filtros-section">
-                <button class="filtro-btn ativo" data-filtro="todas">Todas</button>
-                <button class="filtro-btn" data-filtro="hoje">Hoje</button>
-                <button class="filtro-btn" data-filtro="agendadas">Agendadas</button>
-                <button class="filtro-btn" data-filtro="alta">Alta Prioridade</button>
-                <button class="filtro-btn" data-filtro="concluidas">Concluídas</button>
+            <!-- Calendar Controls -->
+            <div class="calendar-controls">
+                <div class="calendar-nav">
+                    <button id="btnPrev" class="calendar-nav-btn" aria-label="Anterior">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                    </button>
+                    <button id="btnToday" class="calendar-today-btn">Hoje</button>
+                    <button id="btnNext" class="calendar-nav-btn" aria-label="Próximo">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                    </button>
+                    <span id="calendarTitle" class="calendar-title"></span>
+                </div>
+                <div class="view-toggle">
+                    <button data-view="day">Dia</button>
+                    <button data-view="week">Semana</button>
+                    <button data-view="month" class="ativo">Mês</button>
+                </div>
             </div>
 
-            <!-- Lista de Tarefas -->
-            <div id="tarefasContainer" class="tarefas-container">
-                <p class="text-empty">Carregando tarefas...</p>
-            </div>
+            <!-- Calendar Container -->
+            <div id="calendarContainer"></div>
         </main>
     </div>
 
-    <!-- Modal Nova Tarefa -->
-    <div id="modalNovaTarefaOverlay" class="modal-overlay">
+    <!-- Modal Nova Tarefa (Calendar) -->
+    <div id="modalNovaTarefaCalOverlay" class="modal-overlay">
         <div class="modal">
             <div class="modal-header">
-                <h2>Nova Tarefa</h2>
+                <h2 id="modalCalTitle">Nova Tarefa</h2>
                 <button class="modal-close" aria-label="Fechar">&times;</button>
             </div>
-            <form id="formNovaTarefaForm" class="form-modal">
+            <form id="formTarefaCal" class="form-modal">
+                <input type="hidden" id="cal_tarefa_id" name="id">
                 <div class="form-group">
-                    <label for="titulo">Título <span class="required">*</span></label>
-                    <input type="text" id="titulo" name="titulo" required placeholder="Ex: Ir à academia">
+                    <label for="cal_titulo">Título <span class="required">*</span></label>
+                    <input type="text" id="cal_titulo" name="titulo" required placeholder="Ex: Reunião de equipe">
                 </div>
 
                 <div class="form-group">
-                    <label for="descricao">Descrição</label>
-                    <textarea id="descricao" name="descricao" placeholder="Descreva a tarefa..."></textarea>
+                    <label for="cal_descricao">Descrição</label>
+                    <textarea id="cal_descricao" name="descricao" placeholder="Descrição..."></textarea>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="prioridade">Prioridade</label>
-                        <select id="prioridade" name="prioridade">
+                        <label for="cal_prioridade">Prioridade</label>
+                        <select id="cal_prioridade" name="prioridade">
                             <option value="baixa">Baixa</option>
                             <option value="media" selected>Média</option>
                             <option value="alta">Alta</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="dataAtual">Data e hora</label>
-                        <input type="datetime-local" id="dataAtual" name="dataAtual">
+                        <label for="cal_data">Data e hora</label>
+                        <input type="datetime-local" id="cal_data" name="dataAtual">
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="recorrencia">Recorrência</label>
-                    <select id="recorrencia" name="recorrencia">
+                    <label for="cal_recorrencia">Recorrência</label>
+                    <select id="cal_recorrencia" name="recorrencia">
                         <option value="nenhuma" selected>Nenhuma</option>
                         <option value="diaria">Diária</option>
                         <option value="semanal">Semanal</option>
@@ -134,75 +143,22 @@ verificarLogin();
                     </select>
                 </div>
 
-                <div class="form-group" id="group_data_limite" style="display:none;">
-                    <label for="dataVencimento">Repetir até</label>
-                    <input type="datetime-local" id="dataVencimento" name="dataVencimento">
+                <div class="form-group" id="cal_group_data_limite" style="display:none;">
+                    <label for="cal_dataVencimento">Repetir até</label>
+                    <input type="datetime-local" id="cal_dataVencimento" name="dataVencimento">
                 </div>
 
-                <div id="mensagemErroModal" class="mensagem-erro"></div>
-                <button type="submit" class="btn btn-primary btn-full">Criar Tarefa</button>
+                <div id="mensagemErroCal" class="mensagem-erro"></div>
+                <button type="submit" id="btnSubmitCal" class="btn btn-primary btn-full">Criar Tarefa</button>
             </form>
         </div>
     </div>
 
-    <!-- Modal Editar Tarefa -->
-    <div id="modalEditarTarefaOverlay" class="modal-overlay">
-        <div class="modal">
-            <div class="modal-header">
-                <h2>Editar Tarefa</h2>
-                <button class="modal-close" aria-label="Fechar">&times;</button>
-            </div>
-            <form id="formEditarTarefaForm" class="form-modal">
-                <input type="hidden" id="edit_id" name="id">
-                <div class="form-group">
-                    <label for="edit_titulo">Título <span class="required">*</span></label>
-                    <input type="text" id="edit_titulo" name="titulo" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="edit_descricao">Descrição</label>
-                    <textarea id="edit_descricao" name="descricao"></textarea>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="edit_prioridade">Prioridade</label>
-                        <select id="edit_prioridade" name="prioridade">
-                            <option value="baixa">Baixa</option>
-                            <option value="media">Média</option>
-                            <option value="alta">Alta</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit_dataAtual">Data e hora</label>
-                        <input type="datetime-local" id="edit_dataAtual" name="dataAtual">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="edit_recorrencia">Recorrência</label>
-                    <select id="edit_recorrencia" name="recorrencia">
-                        <option value="nenhuma">Nenhuma</option>
-                        <option value="diaria">Diária</option>
-                        <option value="semanal">Semanal</option>
-                        <option value="dias_semana">Dias de Semana (Seg-Sex)</option>
-                        <option value="anual">Anual</option>
-                    </select>
-                </div>
-
-                <div class="form-group" id="edit_group_data_limite" style="display:none;">
-                    <label for="edit_dataVencimento">Repetir até</label>
-                    <input type="datetime-local" id="edit_dataVencimento" name="dataVencimento">
-                </div>
-
-                <div id="mensagemErroModalEdit" class="mensagem-erro"></div>
-                <button type="submit" class="btn btn-primary btn-full">Salvar Alterações</button>
-            </form>
-        </div>
-    </div>
+    <!-- Event Popup (positioned dynamically via JS) -->
+    <div id="eventPopup" class="event-popup" style="display:none;"></div>
 
     <script src="js/confirm-modal.js"></script>
     <script src="js/menu.js"></script>
-    <script src="js/tarefas.js"></script>
+    <script src="js/calendario.js"></script>
 </body>
 </html>

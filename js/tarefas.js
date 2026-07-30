@@ -9,8 +9,16 @@ let filtroAtual = 'todas';
 let listaTarefas = [];
 let processandoConclusao = false;
 
-// ─── HELPER getElementById com null-safety ────────────────────────────────────
+// ─── HELPER ───────────────────────────────────────────────────────────────────
 function el(id) { return document.getElementById(id); }
+
+// SVG icon templates
+const ICONS = {
+    edit: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>',
+    trash: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>',
+    repeat: '<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>',
+    warning: '<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>'
+};
 
 // ─── CARREGAR ─────────────────────────────────────────────────────────────────
 function carregarTarefas() {
@@ -41,15 +49,16 @@ function exibirTarefas(tarefas) {
 
     const hoje = new Date();
 
-    lista.forEach(tarefa => {
+    lista.forEach((tarefa, index) => {
         const dataAtual  = tarefa.data_atual ? new Date(tarefa.data_atual.replace(' ', 'T')) : null;
         const isAtrasada = dataAtual && dataAtual < hoje && !tarefa.concluida;
 
         const item = document.createElement('div');
-        item.className = `tarefa-item ${tarefa.concluida ? 'concluida' : ''} ${isAtrasada ? 'atrasada' : ''}`;
+        item.className = `tarefa-item ${tarefa.concluida ? 'concluida' : ''} ${isAtrasada ? 'atrasada' : ''} stagger-item`;
+        item.style.animationDelay = `${index * 40}ms`;
 
         const avisoAtraso = isAtrasada
-            ? `<span style="color:#e74c3c;font-weight:bold;font-size:0.8rem;margin-left:8px;">⚠️ Atrasada</span>`
+            ? `<span class="badge badge-danger" style="margin-left:6px;">${ICONS.warning} Atrasada</span>`
             : '';
 
         let infoData = '';
@@ -57,13 +66,13 @@ function exibirTarefas(tarefas) {
             infoData += `<span>Data: ${formatarData(tarefa.data_atual)}</span>`;
         }
         if (tarefa.recorrencia !== 'nenhuma' && tarefa.data_vencimento) {
-            infoData += `<span style="margin-left:8px;">Limite: ${formatarData(tarefa.data_vencimento)}</span>`;
+            infoData += `<span>Limite: ${formatarData(tarefa.data_vencimento)}</span>`;
         }
 
         item.innerHTML = `
-            <input type="checkbox" class="tarefa-checkbox" data-id="${tarefa.id}" ${tarefa.concluida ? 'checked' : ''}>
+            <input type="checkbox" class="tarefa-checkbox" data-id="${tarefa.id}" ${tarefa.concluida ? 'checked' : ''} aria-label="Marcar como ${tarefa.concluida ? 'pendente' : 'concluída'}">
             <div class="tarefa-content">
-                <div class="tarefa-titulo" ${isAtrasada ? 'style="color:#e74c3c;"' : ''}>
+                <div class="tarefa-titulo">
                     ${escapeHtml(tarefa.titulo)} ${avisoAtraso}
                 </div>
                 ${tarefa.descricao ? `<div class="tarefa-descricao">${escapeHtml(tarefa.descricao)}</div>` : ''}
@@ -73,13 +82,13 @@ function exibirTarefas(tarefas) {
                     </span>
                     ${infoData}
                     ${tarefa.recorrencia !== 'nenhuma'
-                        ? `<span class="tarefa-recorrencia">🔄 ${formatarRecorrencia(tarefa.recorrencia)}</span>`
+                        ? `<span class="tarefa-recorrencia">${ICONS.repeat} ${formatarRecorrencia(tarefa.recorrencia)}</span>`
                         : ''}
                 </div>
             </div>
             <div class="tarefa-actions">
-                <button class="tarefa-btn btn-editar" title="Editar" data-id="${tarefa.id}">✏️</button>
-                <button class="tarefa-btn btn-deletar" title="Deletar" data-id="${tarefa.id}">🗑️</button>
+                <button class="tarefa-btn btn-editar" title="Editar" data-id="${tarefa.id}">${ICONS.edit}</button>
+                <button class="tarefa-btn btn-deletar" title="Deletar" data-id="${tarefa.id}">${ICONS.trash}</button>
             </div>
         `;
         container.appendChild(item);
@@ -118,20 +127,14 @@ function handleCheckboxChange(e) {
                 carregarTarefas();
             } else {
                 checkbox.checked = !concluida;
-                console.error('Erro ao concluir:', data);
             }
         })
-        .catch(err => {
-            checkbox.checked = !concluida;
-            console.error('Erro:', err);
-        })
+        .catch(() => { checkbox.checked = !concluida; })
         .finally(() => { processandoConclusao = false; });
 }
 
 // ─── CONFIGURAR MODAIS ────────────────────────────────────────────────────────
 function configurarModal() {
-
-    // ── MODAL NOVA TAREFA ──
     const modalNovo = el('modalNovaTarefaOverlay');
     const btnAbrir  = el('btnNovaTarefaModal');
     const formNovo  = el('formNovaTarefaForm');
@@ -169,7 +172,6 @@ function configurarModal() {
         salvarNovaTarefa();
     });
 
-    // ── MODAL EDITAR TAREFA ──
     const modalEdit = el('modalEditarTarefaOverlay');
     const formEdit  = el('formEditarTarefaForm');
 
@@ -218,7 +220,7 @@ function salvarNovaTarefa() {
 
     if (!botao || botao.disabled) return;
     botao.disabled = true;
-    botao.textContent = 'Salvando...';
+    botao.innerHTML = '<span class="btn-spinner"></span> Salvando...';
 
     const fd = new FormData();
     fd.append('titulo', titulo);
@@ -294,7 +296,7 @@ function salvarEdicaoTarefa() {
 
     if (!botao || botao.disabled) return;
     botao.disabled = true;
-    botao.textContent = 'Salvando...';
+    botao.innerHTML = '<span class="btn-spinner"></span> Salvando...';
 
     const fd = new FormData();
     fd.append('id', id);
@@ -331,11 +333,9 @@ function deletarTarefa(tarefaId) {
         function() {
             const fd = new FormData();
             fd.append('id', tarefaId);
-
             fetch('api/tarefas.php?acao=deletar', { method: 'POST', body: fd })
                 .then(r => r.json())
-                .then(data => { if (data.sucesso) carregarTarefas(); })
-                .catch(err => console.error('Erro:', err));
+                .then(data => { if (data.sucesso) carregarTarefas(); });
         }
     );
 }
@@ -364,7 +364,7 @@ function configurarLogout() {
                 fetch('api/auth.php?acao=logout', { method: 'POST' })
                     .finally(() => { window.location.href = 'login.php'; });
             },
-            '🚪'
+            '👋'
         );
     });
 }
@@ -388,16 +388,13 @@ function formatarData(data) {
     const partes = data.split(' ');
     const dataStr = partes[0];
     const timeStr = partes[1] || '';
-
     const [ano, mes, dia] = dataStr.split('-');
     let result = `${dia.substring(0, 2)}/${mes}/${ano}`;
-    if (timeStr) {
-        result += ` às ${timeStr.substring(0, 5)}`;
-    }
+    if (timeStr) result += ` às ${timeStr.substring(0, 5)}`;
     return result;
 }
 
 function formatarRecorrencia(rec) {
-    const labels = { diaria: 'Diária', semanal: 'Semanal', anual: 'Anual', dias_semana: 'Dias de Semana' };
+    const labels = { diaria: 'Diária', semanal: 'Semanal', anual: 'Anual', dias_semana: 'Seg-Sex' };
     return labels[rec] || rec;
 }
