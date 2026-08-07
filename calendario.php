@@ -8,7 +8,7 @@ verificarLogin();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Nome ao salvar na Tela de Início -->
-    <meta name="apple-mobile-web-app-title" content="P.&nbspEstoica">
+    <meta name="apple-mobile-web-app-title" content="P. Estoica">
     <!-- Ícone da Tela de Início (iOS) -->
     <link rel="apple-touch-icon" sizes="180x180" href="icon/favicon.png">
     <title>Calendário — Performance Estoica</title>
