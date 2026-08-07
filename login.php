@@ -12,6 +12,10 @@ if (isset($_SESSION['usuario_id'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Performance Estoica — Rastreie seus objetivos, acompanhe seu progresso e alcance a excelência.">
+    <!-- Nome ao salvar na Tela de Início -->
+    <meta name="apple-mobile-web-app-title" content="P.&nbspEstoica">
+    <!-- Ícone da Tela de Início (iOS) -->
+    <link rel="apple-touch-icon" sizes="180x180" href="icon/favicon.png">
     <title>Login — Performance Estoica</title>
     <link rel="icon" type="image/svg+xml" href="icon/favicon.svg">
     <link rel="stylesheet" href="css/geral.css">
