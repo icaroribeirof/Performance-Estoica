@@ -129,6 +129,66 @@
     --transition: var(--duration-normal) var(--ease-default);
 }
 
+/* ── Light Theme Tokens ────────────────────────────────────────────── */
+:root[data-theme="light"],
+html[data-theme="light"],
+body.light-theme,
+[data-theme="light"] {
+    /* Colors — Semantic */
+    --success-50:  rgba(16, 185, 129, 0.1);
+    --success-100: rgba(16, 185, 129, 0.16);
+    --success-text: #059669;
+
+    --warning-50:  rgba(245, 158, 11, 0.1);
+    --warning-100: rgba(245, 158, 11, 0.16);
+    --warning-text: #d97706;
+
+    --danger-50:   rgba(239, 68, 68, 0.1);
+    --danger-100:  rgba(239, 68, 68, 0.16);
+    --danger-text: #dc2626;
+
+    --info-50:     rgba(59, 130, 246, 0.1);
+    --info-100:    rgba(59, 130, 246, 0.16);
+    --info-text:   #2563eb;
+
+    /* Colors — Surface (Light Theme) */
+    --bg-primary:    #f8fafc;
+    --bg-secondary:  #ffffff;
+    --bg-surface:    #f1f5f9;
+    --bg-elevated:   #ffffff;
+    --bg-overlay:    rgba(15, 23, 42, 0.45);
+
+    /* Colors — Border */
+    --border-primary:   rgba(148, 163, 184, 0.32);
+    --border-secondary: rgba(148, 163, 184, 0.2);
+    --border-hover:     rgba(99, 102, 241, 0.5);
+    --border-focus:     var(--primary-500);
+
+    /* Colors — Text */
+    --text-primary:   #0f172a;
+    --text-secondary: #475569;
+    --text-tertiary:  #64748b;
+    --text-inverse:   #ffffff;
+
+    /* Shadows */
+    --shadow-xs:  0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-sm:  0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+    --shadow-md:  0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+    --shadow-lg:  0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.03);
+    --shadow-xl:  0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+    --shadow-glow-primary: 0 0 20px rgba(99, 102, 241, 0.18);
+    --shadow-glow-success: 0 0 20px rgba(16, 185, 129, 0.18);
+    --shadow-glow-danger:  0 0 20px rgba(239, 68, 68, 0.18);
+}
+
+/* Smooth transition when toggling themes */
+html.theme-transitioning,
+html.theme-transitioning *,
+html.theme-transitioning *::before,
+html.theme-transitioning *::after {
+    transition: background-color 200ms ease, border-color 200ms ease, color 200ms ease, box-shadow 200ms ease !important;
+}
+
 /* ── Reset ─────────────────────────────────────────────────────────── */
 *,
 *::before,
@@ -327,6 +387,72 @@ a:hover {
     border-top-color: white;
     border-radius: 50%;
     animation: spin 0.6s linear infinite;
+}
+
+/* Theme Toggle Button */
+.btn-theme-toggle {
+    user-select: none;
+}
+
+.btn-theme-toggle .theme-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.btn-theme-toggle .theme-icon svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Light Theme Component Specifics */
+[data-theme="light"] .btn-secondary {
+    background: #ffffff;
+    border-color: rgba(148, 163, 184, 0.35);
+    color: var(--text-primary);
+}
+
+[data-theme="light"] .btn-secondary:hover:not(:disabled) {
+    background: #f1f5f9;
+    border-color: var(--primary-400);
+}
+
+[data-theme="light"] .btn-ghost:hover:not(:disabled) {
+    background: rgba(148, 163, 184, 0.12);
+    color: var(--text-primary);
+}
+
+[data-theme="light"] .btn-outline {
+    color: var(--primary-600);
+    border-color: var(--border-primary);
+}
+
+[data-theme="light"] .btn-outline:hover:not(:disabled) {
+    background: rgba(99, 102, 241, 0.08);
+    border-color: var(--primary-600);
+    color: var(--primary-700);
+}
+
+[data-theme="light"] .form-group input:focus,
+[data-theme="light"] .form-group textarea:focus,
+[data-theme="light"] .form-group select:focus,
+[data-theme="light"] .form-select:focus {
+    background: #ffffff;
+}
+
+[data-theme="light"] .nav-item:hover {
+    background: rgba(148, 163, 184, 0.12);
+    color: var(--text-primary);
+}
+
+[data-theme="light"] .nav-item.ativo {
+    background: rgba(99, 102, 241, 0.12);
+    color: var(--primary-600);
+}
+
+[data-theme="light"] .nav-item.ativo .icon {
+    color: var(--primary-600);
 }
 
 /* ── Form Controls ─────────────────────────────────────────────────── */

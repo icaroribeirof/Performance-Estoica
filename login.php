@@ -20,6 +20,13 @@ if (isset($_SESSION['usuario_id'])) {
     <link rel="icon" type="image/svg+xml" href="icon/favicon.svg">
     <link rel="stylesheet" href="css/geral.css">
     <link rel="stylesheet" href="css/login.css">
+    <script>
+        (function() {
+            var theme = localStorage.getItem('app_theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+            document.documentElement.classList.add(theme === 'light' ? 'light-theme' : 'dark-theme');
+        })();
+    </script>
 </head>
 <body>
     <div class="container-auth">
@@ -97,6 +104,7 @@ if (isset($_SESSION['usuario_id'])) {
         </div>
     </div>
 
+    <script src="js/theme.js"></script>
     <script src="js/login.js"></script>
 </body>
 </html>

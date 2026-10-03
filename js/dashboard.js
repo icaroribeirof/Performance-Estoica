@@ -180,12 +180,22 @@ function animarContador(el, targetValue) {
 
 // ── Chart ─────────────────────────────────────────────────────────────
 let chartInstance = null;
+let dadosRegistrosCache = null;
+
+window.addEventListener('themeChanged', function() {
+    if (dadosRegistrosCache && document.getElementById('chartTreinos')) {
+        renderizarGraficoTreinos(dadosRegistrosCache);
+    }
+});
 
 function renderizarGraficoTreinos(registros) {
     const ctx = document.getElementById('chartTreinos');
     if (!ctx) return;
 
+    dadosRegistrosCache = registros;
     if (chartInstance) chartInstance.destroy();
+
+    const isLight = document.documentElement.getAttribute('data-theme') === 'light';
 
     const agrupado = {};
     registros.forEach(reg => {
@@ -236,10 +246,10 @@ function renderizarGraficoTreinos(registros) {
             plugins: {
                 legend: { display: false },
                 tooltip: {
-                    backgroundColor: '#1e293b',
-                    titleColor: '#f1f5f9',
-                    bodyColor: '#94a3b8',
-                    borderColor: 'rgba(148, 163, 184, 0.12)',
+                    backgroundColor: isLight ? '#ffffff' : '#1e293b',
+                    titleColor: isLight ? '#0f172a' : '#f1f5f9',
+                    bodyColor: isLight ? '#475569' : '#94a3b8',
+                    borderColor: isLight ? 'rgba(148, 163, 184, 0.25)' : 'rgba(148, 163, 184, 0.12)',
                     borderWidth: 1,
                     cornerRadius: 8,
                     padding: 12,
@@ -255,11 +265,11 @@ function renderizarGraficoTreinos(registros) {
                 y: {
                     beginAtZero: true,
                     grid: {
-                        color: 'rgba(148, 163, 184, 0.06)',
+                        color: isLight ? 'rgba(148, 163, 184, 0.15)' : 'rgba(148, 163, 184, 0.06)',
                         drawBorder: false
                     },
                     ticks: {
-                        color: '#64748b',
+                        color: isLight ? '#475569' : '#64748b',
                         font: { family: 'Inter', size: 12 },
                         padding: 8
                     },
@@ -268,7 +278,7 @@ function renderizarGraficoTreinos(registros) {
                 x: {
                     grid: { display: false },
                     ticks: {
-                        color: '#64748b',
+                        color: isLight ? '#475569' : '#64748b',
                         font: { family: 'Inter', size: 12 },
                         padding: 8
                     },
