@@ -54,6 +54,11 @@ if (isset($_SESSION['usuario_id'])) {
                 </div>
 
                 <div class="form-group">
+                    <label for="telefone">Telefone</label>
+                    <input type="tel" id="telefone" name="telefone" required placeholder="(11) 99999-9999" autocomplete="tel" maxlength="15">
+                </div>
+
+                <div class="form-group">
                     <label for="senha">Senha</label>
                     <input type="password" id="senha" name="senha" required placeholder="Mínimo 6 caracteres" autocomplete="new-password">
                     <div id="passwordStrength" class="password-strength" style="display:none;">

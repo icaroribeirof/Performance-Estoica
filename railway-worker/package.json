@@ -1,0 +1,13 @@
+{
+  "name": "performance-estoica-cron-worker",
+  "version": "1.0.0",
+  "description": "Worker 24/7 para disparo de notificações WhatsApp no Railway",
+  "main": "worker.js",
+  "scripts": {
+    "start": "node worker.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {}
+}

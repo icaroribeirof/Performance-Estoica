@@ -35,4 +35,18 @@ document.addEventListener('DOMContentLoaded', function() {
             fecharMenu();
         }
     });
+
+    // Auto-Heartbeat de Notificações WhatsApp (executa no navegador para contornar o bloqueio de bot do InfinityFree)
+    (function initNotificationHeartbeat() {
+        var cronUrl = window.location.origin + '/cron/notify_whatsapp.php';
+        function dispararCron() {
+            fetch(cronUrl, { method: 'GET', cache: 'no-store' })
+                .catch(function() { /* Silencioso */ });
+        }
+        // Dispara 3 segundos após carregar a página
+        setTimeout(dispararCron, 3000);
+        // E repete a cada 60 segundos com o site aberto
+        setInterval(dispararCron, 60000);
+    })();
 });
+

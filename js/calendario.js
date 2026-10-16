@@ -549,6 +549,14 @@ function setupModal() {
         });
     }
 
+    const selectNotifCal = document.getElementById('cal_notificacaoAtiva');
+    const grpNotifCal = document.getElementById('cal_group_tempo_notificacao');
+    if (selectNotifCal && grpNotifCal) {
+        selectNotifCal.addEventListener('change', () => {
+            grpNotifCal.style.display = selectNotifCal.value === '1' ? '' : 'none';
+        });
+    }
+
     form.addEventListener('submit', (e) => {
         e.preventDefault();
         submitTarefaCal();
@@ -563,6 +571,15 @@ function abrirModalCriar(date = null, hour = null) {
     document.getElementById('formTarefaCal').reset();
     document.getElementById('mensagemErroCal').classList.remove('ativo');
     document.getElementById('cal_group_data_limite').style.display = 'none';
+    if (document.getElementById('cal_group_tempo_notificacao')) {
+        document.getElementById('cal_group_tempo_notificacao').style.display = 'none';
+    }
+    if (document.getElementById('cal_notificacaoAtiva')) {
+        document.getElementById('cal_notificacaoAtiva').value = '0';
+    }
+    if (document.getElementById('cal_tempoNotificacao')) {
+        document.getElementById('cal_tempoNotificacao').value = 'na_hora';
+    }
 
     // Pre-fill date/time if provided
     if (date) {
@@ -587,12 +604,24 @@ function abrirModalEditar(id) {
     document.getElementById('cal_tarefa_id').value = task.id;
     document.getElementById('cal_titulo').value = task.titulo;
     document.getElementById('cal_descricao').value = task.descricao || '';
+    if (document.getElementById('cal_local')) {
+        document.getElementById('cal_local').value = task.local || '';
+    }
     document.getElementById('cal_prioridade').value = task.prioridade;
     document.getElementById('cal_recorrencia').value = task.recorrencia || 'nenhuma';
 
     const grpLimite = document.getElementById('cal_group_data_limite');
     const temRec = task.recorrencia && task.recorrencia !== 'nenhuma';
     grpLimite.style.display = temRec ? '' : 'none';
+
+    const temNotif = task.notificacao_ativa == 1 || task.notificacao_ativa === '1';
+    const selectNotifCal = document.getElementById('cal_notificacaoAtiva');
+    const grpNotifCal = document.getElementById('cal_group_tempo_notificacao');
+    const selectTempoNotifCal = document.getElementById('cal_tempoNotificacao');
+
+    if (selectNotifCal) selectNotifCal.value = temNotif ? '1' : '0';
+    if (grpNotifCal) grpNotifCal.style.display = temNotif ? '' : 'none';
+    if (selectTempoNotifCal) selectTempoNotifCal.value = task.tempo_notificacao || 'na_hora';
 
     if (task.data_atual) {
         document.getElementById('cal_data').value = task.data_atual.replace(' ', 'T').substring(0, 16);
@@ -616,15 +645,18 @@ function fecharModal() {
 }
 
 function submitTarefaCal() {
-    const id         = document.getElementById('cal_tarefa_id').value;
-    const titulo     = document.getElementById('cal_titulo').value.trim();
-    const descricao  = document.getElementById('cal_descricao').value.trim();
-    const prioridade = document.getElementById('cal_prioridade').value;
-    const dataAtual  = document.getElementById('cal_data').value;
-    const dataVenc   = document.getElementById('cal_dataVencimento').value;
-    const recorrencia= document.getElementById('cal_recorrencia').value;
-    const msgErro    = document.getElementById('mensagemErroCal');
-    const botao      = document.getElementById('btnSubmitCal');
+    const id               = document.getElementById('cal_tarefa_id').value;
+    const titulo           = document.getElementById('cal_titulo').value.trim();
+    const descricao        = document.getElementById('cal_descricao').value.trim();
+    const local            = (document.getElementById('cal_local')?.value || '').trim();
+    const prioridade       = document.getElementById('cal_prioridade').value;
+    const dataAtual        = document.getElementById('cal_data').value;
+    const dataVenc         = document.getElementById('cal_dataVencimento').value;
+    const recorrencia      = document.getElementById('cal_recorrencia').value;
+    const notificacaoAtiva = document.getElementById('cal_notificacaoAtiva')?.value === '1' ? '1' : '0';
+    const tempoNotificacao = notificacaoAtiva === '1' ? (document.getElementById('cal_tempoNotificacao')?.value || 'na_hora') : '';
+    const msgErro          = document.getElementById('mensagemErroCal');
+    const botao            = document.getElementById('btnSubmitCal');
 
     msgErro.classList.remove('ativo');
 
@@ -646,10 +678,13 @@ function submitTarefaCal() {
     if (id) fd.append('id', id);
     fd.append('titulo', titulo);
     fd.append('descricao', descricao);
+    fd.append('local', local);
     fd.append('prioridade', prioridade);
     fd.append('data_atual', dataAtual);
     fd.append('data_vencimento', dataVenc);
     fd.append('recorrencia', recorrencia);
+    fd.append('notificacao_ativa', notificacaoAtiva);
+    fd.append('tempo_notificacao', tempoNotificacao);
 
     const acao = id ? 'editar' : 'adicionar';
 

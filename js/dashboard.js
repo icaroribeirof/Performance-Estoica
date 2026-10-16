@@ -337,6 +337,27 @@ function configurarModais() {
     }
 
     if (formConfig) {
+        const configTelefone = document.getElementById('configTelefone');
+        if (configTelefone) {
+            configTelefone.addEventListener('input', function(e) {
+                let digitos = e.target.value.replace(/\D/g, '').slice(0, 11);
+                if (!digitos) {
+                    e.target.value = '';
+                    return;
+                }
+
+                if (digitos.length <= 2) {
+                    e.target.value = `(${digitos}`;
+                } else if (digitos.length <= 6) {
+                    e.target.value = `(${digitos.slice(0, 2)}) ${digitos.slice(2)}`;
+                } else if (digitos.length <= 10) {
+                    e.target.value = `(${digitos.slice(0, 2)}) ${digitos.slice(2, 6)}-${digitos.slice(6)}`;
+                } else {
+                    e.target.value = `(${digitos.slice(0, 2)}) ${digitos.slice(2, 7)}-${digitos.slice(7, 11)}`;
+                }
+            });
+        }
+
         formConfig.addEventListener('submit', function(e) {
             e.preventDefault();
             salvarConfiguracoes();
@@ -346,6 +367,7 @@ function configurarModais() {
 
 function salvarConfiguracoes() {
     const nome = document.getElementById('configNome').value.trim();
+    const telefone = document.getElementById('configTelefone')?.value.trim() || '';
     const senhaNova = document.getElementById('configSenhaNova').value;
     const msgErro = document.getElementById('mensagemErroConfig');
     const msgSucesso = document.getElementById('mensagemSucessoConfig');
@@ -356,6 +378,13 @@ function salvarConfiguracoes() {
 
     if (!nome) {
         msgErro.textContent = 'O nome não pode estar vazio';
+        msgErro.classList.add('ativo');
+        return;
+    }
+
+    const telefoneDigitos = telefone.replace(/\D/g, '');
+    if (!telefone || telefoneDigitos.length < 10 || telefoneDigitos.length > 11) {
+        msgErro.textContent = 'Informe um telefone válido com DDD (ex: (11) 99999-9999)';
         msgErro.classList.add('ativo');
         return;
     }
@@ -371,6 +400,7 @@ function salvarConfiguracoes() {
 
     const formData = new FormData();
     formData.append('nome', nome);
+    formData.append('telefone', telefone);
     if (senhaNova) formData.append('senha_nova', senhaNova);
 
     fetch('api/auth.php?acao=atualizar_perfil', { method: 'POST', body: formData })

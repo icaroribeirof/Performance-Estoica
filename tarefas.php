@@ -128,6 +128,11 @@ verificarLogin();
                     <textarea id="descricao" name="descricao" placeholder="Descreva a tarefa..."></textarea>
                 </div>
 
+                <div class="form-group">
+                    <label for="local">Local</label>
+                    <input type="text" id="local" name="local" placeholder="Ex: Sala de Reunião, Academia, Online...">
+                </div>
+
                 <div class="form-row">
                     <div class="form-group">
                         <label for="prioridade">Prioridade</label>
@@ -159,6 +164,26 @@ verificarLogin();
                     <input type="datetime-local" id="dataVencimento" name="dataVencimento">
                 </div>
 
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="notificacaoAtiva">Notificações</label>
+                        <select id="notificacaoAtiva" name="notificacao_ativa">
+                            <option value="0" selected>Não</option>
+                            <option value="1">Sim</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="group_tempo_notificacao" style="display:none;">
+                        <label for="tempoNotificacao">Notificar</label>
+                        <select id="tempoNotificacao" name="tempo_notificacao">
+                            <option value="na_hora" selected>Na hora do evento</option>
+                            <option value="15m">15 minutos antes</option>
+                            <option value="30m">30 minutos antes</option>
+                            <option value="1h">1 hora antes</option>
+                            <option value="1d">1 dia antes</option>
+                        </select>
+                    </div>
+                </div>
+
                 <div id="mensagemErroModal" class="mensagem-erro"></div>
                 <button type="submit" class="btn btn-primary btn-full">Criar Tarefa</button>
             </form>
@@ -182,6 +207,11 @@ verificarLogin();
                 <div class="form-group">
                     <label for="edit_descricao">Descrição</label>
                     <textarea id="edit_descricao" name="descricao"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit_local">Local</label>
+                    <input type="text" id="edit_local" name="local" placeholder="Ex: Sala de Reunião, Academia, Online...">
                 </div>
 
                 <div class="form-row">
@@ -213,6 +243,26 @@ verificarLogin();
                 <div class="form-group" id="edit_group_data_limite" style="display:none;">
                     <label for="edit_dataVencimento">Repetir até</label>
                     <input type="datetime-local" id="edit_dataVencimento" name="dataVencimento">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit_notificacaoAtiva">Notificações</label>
+                        <select id="edit_notificacaoAtiva" name="notificacao_ativa">
+                            <option value="0" selected>Não</option>
+                            <option value="1">Sim</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="edit_group_tempo_notificacao" style="display:none;">
+                        <label for="edit_tempoNotificacao">Notificar</label>
+                        <select id="edit_tempoNotificacao" name="tempo_notificacao">
+                            <option value="na_hora" selected>Na hora do evento</option>
+                            <option value="15m">15 minutos antes</option>
+                            <option value="30m">30 minutos antes</option>
+                            <option value="1h">1 hora antes</option>
+                            <option value="1d">1 dia antes</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div id="mensagemErroModalEdit" class="mensagem-erro"></div>

@@ -2,8 +2,24 @@
 require_once 'config.php';
 verificarLogin();
 
-$usuario_nome = $_SESSION['usuario_nome'];
 $usuario_id = $_SESSION['usuario_id'];
+$usuario_nome = $_SESSION['usuario_nome'] ?? '';
+$usuario_telefone = $_SESSION['usuario_telefone'] ?? '';
+
+// Buscar dados atualizados do usuário no banco
+$stmt_usuario = $conexao->prepare("SELECT nome, telefone FROM usuarios WHERE id = ?");
+if ($stmt_usuario) {
+    $stmt_usuario->bind_param("i", $usuario_id);
+    $stmt_usuario->execute();
+    $res_usuario = $stmt_usuario->get_result();
+    if ($dados_usuario = $res_usuario->fetch_assoc()) {
+        $usuario_nome = $dados_usuario['nome'];
+        $usuario_telefone = $dados_usuario['telefone'] ?? '';
+        $_SESSION['usuario_nome'] = $usuario_nome;
+        $_SESSION['usuario_telefone'] = $usuario_telefone;
+    }
+    $stmt_usuario->close();
+}
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -203,6 +219,11 @@ $usuario_id = $_SESSION['usuario_id'];
                 <div class="form-group">
                     <label for="configNome">Nome <span class="required">*</span></label>
                     <input type="text" id="configNome" name="nome" value="<?php echo htmlspecialchars($usuario_nome); ?>" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="configTelefone">Telefone <span class="required">*</span></label>
+                    <input type="tel" id="configTelefone" name="telefone" value="<?php echo htmlspecialchars($usuario_telefone); ?>" required placeholder="(11) 99999-9999" autocomplete="tel" maxlength="15">
                 </div>
 
                 <div class="form-group">

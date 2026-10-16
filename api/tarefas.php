@@ -58,12 +58,21 @@ if ($acao === 'listar') {
 
 // ─── ADICIONAR ────────────────────────────────────────────────────────────────
 if ($acao === 'adicionar') {
-    $titulo      = trim($_POST['titulo'] ?? '');
-    $descricao   = trim($_POST['descricao'] ?? '');
-    $prioridade  = $_POST['prioridade'] ?? 'media';
-    $data_atual  = $_POST['data_atual'] ?? '';
-    $data_venc   = $_POST['data_vencimento'] ?? '';
-    $recorrencia = $_POST['recorrencia'] ?? 'nenhuma';
+    $titulo            = trim($_POST['titulo'] ?? '');
+    $descricao         = trim($_POST['descricao'] ?? '');
+    $local             = trim($_POST['local'] ?? '');
+    $prioridade        = $_POST['prioridade'] ?? 'media';
+    $data_atual        = $_POST['data_atual'] ?? '';
+    $data_venc         = $_POST['data_vencimento'] ?? '';
+    $recorrencia       = $_POST['recorrencia'] ?? 'nenhuma';
+    $notificacao_ativa = (!empty($_POST['notificacao_ativa']) && in_array((string)$_POST['notificacao_ativa'], ['1', 'true', 'sim'], true)) ? 1 : 0;
+    
+    $opcoes_tempo      = ['na_hora', '15m', '30m', '1h', '1d'];
+    $tempo_notificacao = null;
+    if ($notificacao_ativa) {
+        $tempo_recebido    = $_POST['tempo_notificacao'] ?? 'na_hora';
+        $tempo_notificacao = in_array($tempo_recebido, $opcoes_tempo, true) ? $tempo_recebido : 'na_hora';
+    }
 
     if (!$titulo) {
         echo json_encode(['sucesso' => false, 'mensagem' => 'Título é obrigatório']);
@@ -78,10 +87,12 @@ if ($acao === 'adicionar') {
         $data_venc = $data_atual;
     }
 
-    $sql  = "INSERT INTO tarefas (usuario_id, titulo, descricao, prioridade, data_atual, data_vencimento, recorrencia)
-             VALUES (?, ?, ?, ?, ?, ?, ?)";
+    $local_val = $local !== '' ? $local : null;
+
+    $sql  = "INSERT INTO tarefas (usuario_id, titulo, descricao, local, prioridade, data_atual, data_vencimento, recorrencia, notificacao_ativa, tempo_notificacao)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     $stmt = $conexao->prepare($sql);
-    $stmt->bind_param("issssss", $usuario_id, $titulo, $descricao, $prioridade, $data_atual, $data_venc, $recorrencia);
+    $stmt->bind_param("isssssssis", $usuario_id, $titulo, $descricao, $local_val, $prioridade, $data_atual, $data_venc, $recorrencia, $notificacao_ativa, $tempo_notificacao);
 
     if ($stmt->execute()) {
         echo json_encode(['sucesso' => true, 'id' => $stmt->insert_id]);
@@ -94,13 +105,22 @@ if ($acao === 'adicionar') {
 
 // ─── EDITAR ───────────────────────────────────────────────────────────────────
 if ($acao === 'editar') {
-    $id          = (int)($_POST['id'] ?? 0);
-    $titulo      = trim($_POST['titulo'] ?? '');
-    $descricao   = trim($_POST['descricao'] ?? '');
-    $prioridade  = $_POST['prioridade'] ?? 'media';
-    $data_atual  = $_POST['data_atual'] ?? '';
-    $data_venc   = $_POST['data_vencimento'] ?? '';
-    $recorrencia = $_POST['recorrencia'] ?? 'nenhuma';
+    $id                = (int)($_POST['id'] ?? 0);
+    $titulo            = trim($_POST['titulo'] ?? '');
+    $descricao         = trim($_POST['descricao'] ?? '');
+    $local             = trim($_POST['local'] ?? '');
+    $prioridade        = $_POST['prioridade'] ?? 'media';
+    $data_atual        = $_POST['data_atual'] ?? '';
+    $data_venc         = $_POST['data_vencimento'] ?? '';
+    $recorrencia       = $_POST['recorrencia'] ?? 'nenhuma';
+    $notificacao_ativa = (!empty($_POST['notificacao_ativa']) && in_array((string)$_POST['notificacao_ativa'], ['1', 'true', 'sim'], true)) ? 1 : 0;
+
+    $opcoes_tempo      = ['na_hora', '15m', '30m', '1h', '1d'];
+    $tempo_notificacao = null;
+    if ($notificacao_ativa) {
+        $tempo_recebido    = $_POST['tempo_notificacao'] ?? 'na_hora';
+        $tempo_notificacao = in_array($tempo_recebido, $opcoes_tempo, true) ? $tempo_recebido : 'na_hora';
+    }
 
     if (!$titulo || !$id) {
         echo json_encode(['sucesso' => false, 'mensagem' => 'Dados inválidos']);
@@ -114,12 +134,14 @@ if ($acao === 'editar') {
         $data_venc = $data_atual;
     }
 
+    $local_val = $local !== '' ? $local : null;
+
     $sql  = "UPDATE tarefas
-             SET titulo = ?, descricao = ?, prioridade = ?, data_atual = ?, data_vencimento = ?, recorrencia = ?,
-                 concluida = 0, data_conclusao = NULL
+             SET titulo = ?, descricao = ?, local = ?, prioridade = ?, data_atual = ?, data_vencimento = ?, recorrencia = ?,
+                 notificacao_ativa = ?, tempo_notificacao = ?, notificacao_enviada = 0, concluida = 0, data_conclusao = NULL
              WHERE id = ? AND usuario_id = ?";
     $stmt = $conexao->prepare($sql);
-    $stmt->bind_param("ssssssii", $titulo, $descricao, $prioridade, $data_atual, $data_venc, $recorrencia, $id, $usuario_id);
+    $stmt->bind_param("sssssssisii", $titulo, $descricao, $local_val, $prioridade, $data_atual, $data_venc, $recorrencia, $notificacao_ativa, $tempo_notificacao, $id, $usuario_id);
 
     if ($stmt->execute()) {
         echo json_encode(['sucesso' => true]);

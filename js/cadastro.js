@@ -5,6 +5,7 @@ document.getElementById('formCadastro').addEventListener('submit', async functio
 
     const nome = document.getElementById('nome').value;
     const email = document.getElementById('email').value;
+    const telefone = document.getElementById('telefone')?.value?.trim() || '';
     const senha = document.getElementById('senha').value;
     const senhaConfirm = document.getElementById('senhaConfirm').value;
     const mensagemErro = document.getElementById('mensagemErro');
@@ -14,6 +15,13 @@ document.getElementById('formCadastro').addEventListener('submit', async functio
     mensagemSucesso.classList.remove('ativo');
     mensagemErro.textContent = '';
     mensagemSucesso.textContent = '';
+
+    const telefoneDigitos = telefone.replace(/\D/g, '');
+    if (!telefone || telefoneDigitos.length < 10 || telefoneDigitos.length > 11) {
+        mensagemErro.classList.add('ativo');
+        mensagemErro.textContent = 'Informe um telefone válido com DDD (ex: (11) 99999-9999)';
+        return;
+    }
 
     if (senha !== senhaConfirm) {
         mensagemErro.classList.add('ativo');
@@ -35,6 +43,7 @@ document.getElementById('formCadastro').addEventListener('submit', async functio
         const formData = new FormData();
         formData.append('nome', nome);
         formData.append('email', email);
+        formData.append('telefone', telefone);
         formData.append('senha', senha);
         formData.append('senha_confirm', senhaConfirm);
 
@@ -100,3 +109,26 @@ if (senhaInput) {
         label.style.color = level.color;
     });
 }
+
+// Máscara dinâmica para Telefone / Celular: (XX) XXXXX-XXXX ou (XX) XXXX-XXXX
+const telefoneInput = document.getElementById('telefone');
+if (telefoneInput) {
+    telefoneInput.addEventListener('input', function(e) {
+        let digitos = e.target.value.replace(/\D/g, '').slice(0, 11);
+        if (!digitos) {
+            e.target.value = '';
+            return;
+        }
+
+        if (digitos.length <= 2) {
+            e.target.value = `(${digitos}`;
+        } else if (digitos.length <= 6) {
+            e.target.value = `(${digitos.slice(0, 2)}) ${digitos.slice(2)}`;
+        } else if (digitos.length <= 10) {
+            e.target.value = `(${digitos.slice(0, 2)}) ${digitos.slice(2, 6)}-${digitos.slice(6)}`;
+        } else {
+            e.target.value = `(${digitos.slice(0, 2)}) ${digitos.slice(2, 7)}-${digitos.slice(7, 11)}`;
+        }
+    });
+}
+

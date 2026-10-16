@@ -7,11 +7,19 @@ $acao = $_GET['acao'] ?? '';
 if ($acao === 'cadastro') {
     $nome = sanitizar($_POST['nome'] ?? '');
     $email = sanitizar($_POST['email'] ?? '');
+    $telefone = sanitizar($_POST['telefone'] ?? '');
     $senha = $_POST['senha'] ?? '';
     $senha_confirm = $_POST['senha_confirm'] ?? '';
 
-    if (empty($nome) || empty($email) || empty($senha)) {
+    if (empty($nome) || empty($email) || empty($telefone) || empty($senha)) {
         echo json_encode(['sucesso' => false, 'mensagem' => 'Preencha todos os campos']);
+        exit();
+    }
+
+    // Validar formato do telefone (DDD + 8 ou 9 dígitos numéricos: 10 ou 11 dígitos)
+    $telefone_digitos = preg_replace('/\D/', '', $telefone);
+    if (strlen($telefone_digitos) < 10 || strlen($telefone_digitos) > 11) {
+        echo json_encode(['sucesso' => false, 'mensagem' => 'Informe um telefone válido com DDD (ex: (11) 99999-9999)']);
         exit();
     }
 
@@ -39,9 +47,9 @@ if ($acao === 'cadastro') {
     // Hash da senha
     $senha_hash = password_hash($senha, PASSWORD_DEFAULT);
 
-    // Inserir usuário
-    $stmt = $conexao->prepare("INSERT INTO usuarios (nome, email, senha) VALUES (?, ?, ?)");
-    $stmt->bind_param("sss", $nome, $email, $senha_hash);
+    // Inserir usuário com telefone
+    $stmt = $conexao->prepare("INSERT INTO usuarios (nome, email, telefone, senha) VALUES (?, ?, ?, ?)");
+    $stmt->bind_param("ssss", $nome, $email, $telefone, $senha_hash);
 
     if ($stmt->execute()) {
         echo json_encode(['sucesso' => true, 'mensagem' => 'Usuário cadastrado com sucesso!']);
@@ -61,7 +69,7 @@ elseif ($acao === 'login') {
     }
 
     // Buscar usuário
-    $stmt = $conexao->prepare("SELECT id, nome, senha FROM usuarios WHERE email = ? AND ativo = TRUE");
+    $stmt = $conexao->prepare("SELECT id, nome, telefone, senha FROM usuarios WHERE email = ? AND ativo = TRUE");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -82,6 +90,7 @@ elseif ($acao === 'login') {
     // Definir sessão
     $_SESSION['usuario_id'] = $usuario['id'];
     $_SESSION['usuario_nome'] = $usuario['nome'];
+    $_SESSION['usuario_telefone'] = $usuario['telefone'] ?? '';
 
     echo json_encode(['sucesso' => true, 'mensagem' => 'Login realizado com sucesso!', 'redirect' => 'dashboard.php']);
     $stmt->close();
@@ -90,11 +99,24 @@ elseif ($acao === 'login') {
 elseif ($acao === 'atualizar_perfil') {
     verificarLogin();
     $nome = sanitizar($_POST['nome'] ?? '');
+    $telefone = sanitizar($_POST['telefone'] ?? '');
     $senha_nova = $_POST['senha_nova'] ?? '';
     $usuario_id = $_SESSION['usuario_id'];
 
     if (empty($nome)) {
         echo json_encode(['sucesso' => false, 'mensagem' => 'O nome não pode estar vazio']);
+        exit();
+    }
+
+    if (empty($telefone)) {
+        echo json_encode(['sucesso' => false, 'mensagem' => 'O telefone não pode estar vazio']);
+        exit();
+    }
+
+    // Validação de formato do telefone (DDD + 8 ou 9 dígitos numéricos: 10 ou 11 dígitos)
+    $telefone_digitos = preg_replace('/\D/', '', $telefone);
+    if (strlen($telefone_digitos) < 10 || strlen($telefone_digitos) > 11) {
+        echo json_encode(['sucesso' => false, 'mensagem' => 'Informe um telefone válido com DDD (ex: (11) 99999-9999)']);
         exit();
     }
 
@@ -104,15 +126,16 @@ elseif ($acao === 'atualizar_perfil') {
             exit();
         }
         $senha_hash = password_hash($senha_nova, PASSWORD_DEFAULT);
-        $stmt = $conexao->prepare("UPDATE usuarios SET nome = ?, senha = ? WHERE id = ?");
-        $stmt->bind_param("ssi", $nome, $senha_hash, $usuario_id);
+        $stmt = $conexao->prepare("UPDATE usuarios SET nome = ?, telefone = ?, senha = ? WHERE id = ?");
+        $stmt->bind_param("sssi", $nome, $telefone, $senha_hash, $usuario_id);
     } else {
-        $stmt = $conexao->prepare("UPDATE usuarios SET nome = ? WHERE id = ?");
-        $stmt->bind_param("si", $nome, $usuario_id);
+        $stmt = $conexao->prepare("UPDATE usuarios SET nome = ?, telefone = ? WHERE id = ?");
+        $stmt->bind_param("ssi", $nome, $telefone, $usuario_id);
     }
 
     if ($stmt->execute()) {
         $_SESSION['usuario_nome'] = $nome;
+        $_SESSION['usuario_telefone'] = $telefone;
         echo json_encode(['sucesso' => true, 'mensagem' => 'Perfil atualizado com sucesso!']);
     } else {
         echo json_encode(['sucesso' => false, 'mensagem' => 'Erro ao atualizar perfil']);

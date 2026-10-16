@@ -137,6 +137,11 @@ verificarLogin();
                     <textarea id="cal_descricao" name="descricao" placeholder="Descrição..."></textarea>
                 </div>
 
+                <div class="form-group">
+                    <label for="cal_local">Local</label>
+                    <input type="text" id="cal_local" name="local" placeholder="Ex: Sala de Reunião, Academia, Online...">
+                </div>
+
                 <div class="form-row">
                     <div class="form-group">
                         <label for="cal_prioridade">Prioridade</label>
@@ -166,6 +171,26 @@ verificarLogin();
                 <div class="form-group" id="cal_group_data_limite" style="display:none;">
                     <label for="cal_dataVencimento">Repetir até</label>
                     <input type="datetime-local" id="cal_dataVencimento" name="dataVencimento">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cal_notificacaoAtiva">Notificações</label>
+                        <select id="cal_notificacaoAtiva" name="notificacao_ativa">
+                            <option value="0" selected>Não</option>
+                            <option value="1">Sim</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="cal_group_tempo_notificacao" style="display:none;">
+                        <label for="cal_tempoNotificacao">Notificar</label>
+                        <select id="cal_tempoNotificacao" name="tempo_notificacao">
+                            <option value="na_hora" selected>Na hora do evento</option>
+                            <option value="15m">15 minutos antes</option>
+                            <option value="30m">30 minutos antes</option>
+                            <option value="1h">1 hora antes</option>
+                            <option value="1d">1 dia antes</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div id="mensagemErroCal" class="mensagem-erro"></div>
