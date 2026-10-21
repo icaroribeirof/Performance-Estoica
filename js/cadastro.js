@@ -40,16 +40,20 @@ document.getElementById('formCadastro').addEventListener('submit', async functio
     botao.innerHTML = '<span class="btn-spinner"></span> Criando conta...';
 
     try {
-        const formData = new FormData();
-        formData.append('nome', nome);
-        formData.append('email', email);
-        formData.append('telefone', telefone);
-        formData.append('senha', senha);
-        formData.append('senha_confirm', senhaConfirm);
+        const params = new URLSearchParams();
+        params.append('nome', nome);
+        params.append('email', email);
+        params.append('telefone', telefone);
+        params.append('senha', senha);
+        params.append('senha_confirm', senhaConfirm);
 
         const response = await fetch('api/auth.php?acao=cadastro', {
             method: 'POST',
-            body: formData
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: params
         });
 
         const data = await response.json();
@@ -131,4 +135,3 @@ if (telefoneInput) {
         }
     });
 }
-

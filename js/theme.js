@@ -1,4 +1,48 @@
 // ══════════════════════════════════════════════════════════════════════
+// COMPATIBILIDADE DE REQUISIÇÕES (WAF / OpenResty / InfinityFree)
+// Garante headers AJAX e evita bloqueios 403 em requisições POST com FormData
+// ══════════════════════════════════════════════════════════════════════
+(function() {
+    if (typeof window === 'undefined' || !window.fetch) return;
+    const originalFetch = window.fetch;
+    window.fetch = function(resource, init = {}) {
+        if (init && init.method && init.method.toUpperCase() === 'POST') {
+            init.headers = init.headers || {};
+
+            // Injeta cabeçalho AJAX exigido por firewalls de hospedagens gratuitas
+            if (init.headers instanceof Headers) {
+                if (!init.headers.has('X-Requested-With')) {
+                    init.headers.set('X-Requested-With', 'XMLHttpRequest');
+                }
+            } else if (!init.headers['X-Requested-With']) {
+                init.headers['X-Requested-With'] = 'XMLHttpRequest';
+            }
+
+            // Converte FormData sem arquivos para URLSearchParams (evita 403 do WAF da InfinityFree)
+            if (init.body instanceof FormData) {
+                let temArquivo = false;
+                for (const value of init.body.values()) {
+                    if (value instanceof File || value instanceof Blob) {
+                        temArquivo = true;
+                        break;
+                    }
+                }
+
+                if (!temArquivo) {
+                    init.body = new URLSearchParams(init.body);
+                    if (init.headers instanceof Headers) {
+                        init.headers.set('Content-Type', 'application/x-www-form-urlencoded');
+                    } else {
+                        init.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+                    }
+                }
+            }
+        }
+        return originalFetch.call(this, resource, init);
+    };
+})();
+
+// ══════════════════════════════════════════════════════════════════════
 // PERFORMANCE ESTOICA — Gerenciador de Tema (Claro / Escuro)
 // ══════════════════════════════════════════════════════════════════════
 

@@ -15,13 +15,17 @@ document.getElementById('formLogin').addEventListener('submit', async function(e
     botao.innerHTML = '<span class="btn-spinner"></span> Entrando...';
 
     try {
-        const formData = new FormData();
-        formData.append('email', email);
-        formData.append('senha', senha);
+        const params = new URLSearchParams();
+        params.append('email', email);
+        params.append('senha', senha);
 
         const response = await fetch('api/auth.php?acao=login', {
             method: 'POST',
-            body: formData
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: params
         });
 
         const data = await response.json();
