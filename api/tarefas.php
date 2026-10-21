@@ -105,15 +105,16 @@ if ($acao === 'adicionar') {
 
 // ─── EDITAR ───────────────────────────────────────────────────────────────────
 if ($acao === 'editar') {
-    $id                = (int)($_POST['id'] ?? 0);
-    $titulo            = trim($_POST['titulo'] ?? '');
-    $descricao         = trim($_POST['descricao'] ?? '');
-    $local             = trim($_POST['local'] ?? '');
-    $prioridade        = $_POST['prioridade'] ?? 'media';
-    $data_atual        = $_POST['data_atual'] ?? '';
-    $data_venc         = $_POST['data_vencimento'] ?? '';
-    $recorrencia       = $_POST['recorrencia'] ?? 'nenhuma';
-    $notificacao_ativa = (!empty($_POST['notificacao_ativa']) && in_array((string)$_POST['notificacao_ativa'], ['1', 'true', 'sim'], true)) ? 1 : 0;
+    $id                 = (int)($_POST['id'] ?? 0);
+    $titulo             = trim($_POST['titulo'] ?? '');
+    $descricao          = trim($_POST['descricao'] ?? '');
+    $local              = trim($_POST['local'] ?? '');
+    $prioridade         = $_POST['prioridade'] ?? 'media';
+    $data_atual         = $_POST['data_atual'] ?? '';
+    $data_venc          = $_POST['data_vencimento'] ?? '';
+    $recorrencia        = $_POST['recorrencia'] ?? 'nenhuma';
+    $notificacao_ativa  = (!empty($_POST['notificacao_ativa']) && in_array((string)$_POST['notificacao_ativa'], ['1', 'true', 'sim'], true)) ? 1 : 0;
+    $escopo_recorrencia = $_POST['escopo_recorrencia'] ?? 'este_e_futuros';
 
     $opcoes_tempo      = ['na_hora', '15m', '30m', '1h', '1d'];
     $tempo_notificacao = null;
@@ -136,19 +137,97 @@ if ($acao === 'editar') {
 
     $local_val = $local !== '' ? $local : null;
 
+    // Obter dados atuais da tarefa
+    $stmt = $conexao->prepare("SELECT * FROM tarefas WHERE id = ? AND usuario_id = ?");
+    $stmt->bind_param("ii", $id, $usuario_id);
+    $stmt->execute();
+    $tarefa_original = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+
+    if (!$tarefa_original) {
+        echo json_encode(['sucesso' => false, 'mensagem' => 'Tarefa não encontrada']);
+        exit;
+    }
+
+    // Se o usuário escolheu alterar SOMENTE ESTA tarefa de uma série recorrente:
+    if ($escopo_recorrencia === 'somente_este' && $tarefa_original['recorrencia'] !== 'nenhuma') {
+        // 1. Atualiza a tarefa atual como pontual (sem recorrência)
+        $sql  = "UPDATE tarefas
+                 SET titulo = ?, descricao = ?, local = ?, prioridade = ?, data_atual = ?, data_vencimento = ?, recorrencia = 'nenhuma',
+                     notificacao_ativa = ?, tempo_notificacao = ?, notificacao_enviada = 0, concluida = 0, data_conclusao = NULL
+                 WHERE id = ? AND usuario_id = ?";
+        $stmt = $conexao->prepare($sql);
+        $stmt->bind_param("ssssssisii", $titulo, $descricao, $local_val, $prioridade, $data_atual, $data_atual, $notificacao_ativa, $tempo_notificacao, $id, $usuario_id);
+        $stmt->execute();
+        $stmt->close();
+
+        // 2. Continua a série original a partir da próxima data para as futuras
+        if ($tarefa_original['data_atual']) {
+            $proxima = calcularProximaData($tarefa_original['data_atual'], $tarefa_original['recorrencia']);
+            $dentro_do_prazo = $tarefa_original['data_vencimento'] ? ($proxima <= $tarefa_original['data_vencimento']) : true;
+
+            if ($proxima && $dentro_do_prazo) {
+                $stmt = $conexao->prepare(
+                    "INSERT INTO tarefas (usuario_id, titulo, descricao, local, prioridade, data_atual, data_vencimento, recorrencia, notificacao_ativa, tempo_notificacao, notificacao_enviada, concluida)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0)"
+                );
+                $stmt->bind_param(
+                    "isssssssis",
+                    $usuario_id,
+                    $tarefa_original['titulo'],
+                    $tarefa_original['descricao'],
+                    $tarefa_original['local'],
+                    $tarefa_original['prioridade'],
+                    $proxima,
+                    $tarefa_original['data_vencimento'],
+                    $tarefa_original['recorrencia'],
+                    $tarefa_original['notificacao_ativa'],
+                    $tarefa_original['tempo_notificacao']
+                );
+                $stmt->execute();
+                $stmt->close();
+            }
+        }
+
+        echo json_encode(['sucesso' => true]);
+        exit;
+    }
+
+    // Escopo padrão: "este_e_futuros" (Esta e todas as tarefas futuras)
     $sql  = "UPDATE tarefas
              SET titulo = ?, descricao = ?, local = ?, prioridade = ?, data_atual = ?, data_vencimento = ?, recorrencia = ?,
                  notificacao_ativa = ?, tempo_notificacao = ?, notificacao_enviada = 0, concluida = 0, data_conclusao = NULL
              WHERE id = ? AND usuario_id = ?";
     $stmt = $conexao->prepare($sql);
     $stmt->bind_param("sssssssisii", $titulo, $descricao, $local_val, $prioridade, $data_atual, $data_venc, $recorrencia, $notificacao_ativa, $tempo_notificacao, $id, $usuario_id);
+    $execOk = $stmt->execute();
+    $stmt->close();
 
-    if ($stmt->execute()) {
+    if ($execOk) {
+        // Se houver tarefas futuras geradas da mesma série no banco, atualiza as notificações e dados delas também
+        if (!empty($tarefa_original['titulo']) && !empty($tarefa_original['data_atual'])) {
+            $stmt_futuras = $conexao->prepare(
+                "UPDATE tarefas
+                 SET titulo = ?, descricao = ?, local = ?, prioridade = ?,
+                     notificacao_ativa = ?, tempo_notificacao = ?, notificacao_enviada = 0,
+                     data_vencimento = ?, recorrencia = ?
+                 WHERE usuario_id = ? AND titulo = ? AND concluida = 0 AND data_atual > ?"
+            );
+            $stmt_futuras->bind_param(
+                "ssssisssiss",
+                $titulo, $descricao, $local_val, $prioridade,
+                $notificacao_ativa, $tempo_notificacao,
+                $data_venc, $recorrencia,
+                $usuario_id, $tarefa_original['titulo'], $tarefa_original['data_atual']
+            );
+            $stmt_futuras->execute();
+            $stmt_futuras->close();
+        }
+
         echo json_encode(['sucesso' => true]);
     } else {
         echo json_encode(['sucesso' => false, 'mensagem' => 'Erro ao editar tarefa']);
     }
-    $stmt->close();
     exit;
 }
 
@@ -210,18 +289,21 @@ if ($acao === 'concluir') {
 
         if ($proxima && $dentro_do_prazo) {
             $stmt = $conexao->prepare(
-                "INSERT INTO tarefas (usuario_id, titulo, descricao, prioridade, data_atual, data_vencimento, recorrencia, concluida)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, 0)"
+                "INSERT INTO tarefas (usuario_id, titulo, descricao, local, prioridade, data_atual, data_vencimento, recorrencia, notificacao_ativa, tempo_notificacao, notificacao_enviada, concluida)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0)"
             );
             $stmt->bind_param(
-                "issssss",
+                "isssssssis",
                 $usuario_id,
                 $tarefa['titulo'],
                 $tarefa['descricao'],
+                $tarefa['local'],
                 $tarefa['prioridade'],
                 $proxima,
                 $tarefa['data_vencimento'],
-                $tarefa['recorrencia']
+                $tarefa['recorrencia'],
+                $tarefa['notificacao_ativa'],
+                $tarefa['tempo_notificacao']
             );
             $stmt->execute();
             $stmt->close();

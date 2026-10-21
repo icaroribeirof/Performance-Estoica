@@ -214,15 +214,18 @@ function configurarModal() {
     const btnFecharEdit     = modalEdit.querySelector('.modal-close');
     const selectRecEdit     = el('edit_recorrencia');
     const grpLimiteEdit     = el('edit_group_data_limite');
+    const grpEscopoEdit     = el('edit_group_escopo_recorrencia');
     const selectNotifEdit   = el('edit_notificacaoAtiva');
     const grpNotifTempoEdit = el('edit_group_tempo_notificacao');
 
     if (btnFecharEdit) btnFecharEdit.addEventListener('click', () => modalEdit.classList.remove('ativo'));
     modalEdit.addEventListener('click', e => { if (e.target === modalEdit) modalEdit.classList.remove('ativo'); });
 
-    if (selectRecEdit && grpLimiteEdit) {
+    if (selectRecEdit) {
         selectRecEdit.addEventListener('change', () => {
-            grpLimiteEdit.style.display = selectRecEdit.value !== 'nenhuma' ? '' : 'none';
+            const isRec = selectRecEdit.value !== 'nenhuma';
+            if (grpLimiteEdit) grpLimiteEdit.style.display = isRec ? '' : 'none';
+            if (grpEscopoEdit) grpEscopoEdit.style.display = isRec ? '' : 'none';
         });
     }
 
@@ -312,9 +315,14 @@ function abrirModalEdicao(id) {
     const temRec        = tarefa.recorrencia && tarefa.recorrencia !== 'nenhuma';
     const grpLimiteEdit = el('edit_group_data_limite');
     const inputLimite   = el('edit_dataVencimento');
+    const grpEscopoEdit = el('edit_group_escopo_recorrencia');
 
     if (grpLimiteEdit) grpLimiteEdit.style.display = temRec ? '' : 'none';
     if (inputLimite)   inputLimite.value = temRec ? (formatDatetimeLocal(tarefa.data_vencimento) || '') : '';
+    if (grpEscopoEdit) {
+        grpEscopoEdit.style.display = temRec ? '' : 'none';
+        if (el('edit_escopoRecorrencia')) el('edit_escopoRecorrencia').value = 'este_e_futuros';
+    }
 
     const temNotif          = tarefa.notificacao_ativa == 1 || tarefa.notificacao_ativa === '1';
     const selectNotifEdit   = el('edit_notificacaoAtiva');
@@ -331,18 +339,19 @@ function abrirModalEdicao(id) {
 
 // ─── SALVAR EDIÇÃO ────────────────────────────────────────────────────────────
 function salvarEdicaoTarefa() {
-    const id               = el('edit_id')?.value || '';
-    const titulo           = (el('edit_titulo')?.value || '').trim();
-    const descricao        = el('edit_descricao')?.value || '';
-    const local            = (el('edit_local')?.value || '').trim();
-    const prioridade       = el('edit_prioridade')?.value || 'media';
-    const dataAtual        = el('edit_dataAtual')?.value || '';
-    const dataVenc         = el('edit_dataVencimento')?.value || '';
-    const recorrencia      = el('edit_recorrencia')?.value || 'nenhuma';
-    const notificacaoAtiva = el('edit_notificacaoAtiva')?.value === '1' ? '1' : '0';
-    const tempoNotificacao = notificacaoAtiva === '1' ? (el('edit_tempoNotificacao')?.value || 'na_hora') : '';
-    const msgErro          = el('mensagemErroModalEdit');
-    const botao            = document.querySelector('#formEditarTarefaForm button[type="submit"]');
+    const id                = el('edit_id')?.value || '';
+    const titulo            = (el('edit_titulo')?.value || '').trim();
+    const descricao         = el('edit_descricao')?.value || '';
+    const local             = (el('edit_local')?.value || '').trim();
+    const prioridade        = el('edit_prioridade')?.value || 'media';
+    const dataAtual         = el('edit_dataAtual')?.value || '';
+    const dataVenc          = el('edit_dataVencimento')?.value || '';
+    const recorrencia       = el('edit_recorrencia')?.value || 'nenhuma';
+    const escopoRecorrencia = el('edit_escopoRecorrencia')?.value || 'este_e_futuros';
+    const notificacaoAtiva  = el('edit_notificacaoAtiva')?.value === '1' ? '1' : '0';
+    const tempoNotificacao  = notificacaoAtiva === '1' ? (el('edit_tempoNotificacao')?.value || 'na_hora') : '';
+    const msgErro           = el('mensagemErroModalEdit');
+    const botao             = document.querySelector('#formEditarTarefaForm button[type="submit"]');
 
     if (msgErro) msgErro.classList.remove('ativo');
 
@@ -368,6 +377,7 @@ function salvarEdicaoTarefa() {
     fd.append('data_atual', dataAtual);
     fd.append('data_vencimento', dataVenc);
     fd.append('recorrencia', recorrencia);
+    fd.append('escopo_recorrencia', escopoRecorrencia);
     fd.append('notificacao_ativa', notificacaoAtiva);
     fd.append('tempo_notificacao', tempoNotificacao);
 

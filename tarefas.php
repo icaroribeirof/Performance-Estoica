@@ -265,6 +265,17 @@ verificarLogin();
                     </div>
                 </div>
 
+                <div class="form-group" id="edit_group_escopo_recorrencia" style="display:none;">
+                    <label for="edit_escopoRecorrencia">Salvar alterações para</label>
+                    <select id="edit_escopoRecorrencia" name="escopo_recorrencia">
+                        <option value="este_e_futuros" selected>Esta e todas as tarefas futuras</option>
+                        <option value="somente_este">Somente esta tarefa</option>
+                    </select>
+                    <small style="display:block; margin-top:4px; color:var(--text-muted); font-size:12px;">
+                        Defina se as alterações (notificações, local, etc.) valem para todas as próximas repetições ou só para esta.
+                    </small>
+                </div>
+
                 <div id="mensagemErroModalEdit" class="mensagem-erro"></div>
                 <button type="submit" class="btn btn-primary btn-full">Salvar Alterações</button>
             </form>

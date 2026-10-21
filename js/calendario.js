@@ -536,6 +536,7 @@ function setupModal() {
     const form = document.getElementById('formTarefaCal');
     const selectRec = document.getElementById('cal_recorrencia');
     const grpLimite = document.getElementById('cal_group_data_limite');
+    const grpEscopoCal = document.getElementById('cal_group_escopo_recorrencia');
 
     btnNova.addEventListener('click', () => abrirModalCriar());
     btnClose.addEventListener('click', () => fecharModal());
@@ -543,9 +544,11 @@ function setupModal() {
         if (e.target === modalOverlay) fecharModal();
     });
 
-    if (selectRec && grpLimite) {
+    if (selectRec) {
         selectRec.addEventListener('change', () => {
-            grpLimite.style.display = selectRec.value !== 'nenhuma' ? '' : 'none';
+            const isRec = selectRec.value !== 'nenhuma';
+            if (grpLimite) grpLimite.style.display = isRec ? '' : 'none';
+            if (grpEscopoCal) grpEscopoCal.style.display = (isRec && editingTaskId) ? '' : 'none';
         });
     }
 
@@ -581,6 +584,9 @@ function abrirModalCriar(date = null, hour = null) {
         document.getElementById('cal_tempoNotificacao').value = 'na_hora';
     }
 
+    const grpEscopoCal = document.getElementById('cal_group_escopo_recorrencia');
+    if (grpEscopoCal) grpEscopoCal.style.display = 'none';
+
     // Pre-fill date/time if provided
     if (date) {
         const d = new Date(date);
@@ -613,6 +619,14 @@ function abrirModalEditar(id) {
     const grpLimite = document.getElementById('cal_group_data_limite');
     const temRec = task.recorrencia && task.recorrencia !== 'nenhuma';
     grpLimite.style.display = temRec ? '' : 'none';
+
+    const grpEscopoCal = document.getElementById('cal_group_escopo_recorrencia');
+    if (grpEscopoCal) {
+        grpEscopoCal.style.display = temRec ? '' : 'none';
+        if (document.getElementById('cal_escopoRecorrencia')) {
+            document.getElementById('cal_escopoRecorrencia').value = 'este_e_futuros';
+        }
+    }
 
     const temNotif = task.notificacao_ativa == 1 || task.notificacao_ativa === '1';
     const selectNotifCal = document.getElementById('cal_notificacaoAtiva');
@@ -675,7 +689,11 @@ function submitTarefaCal() {
     botao.innerHTML = '<span class="btn-spinner"></span> Salvando...';
 
     const fd = new FormData();
-    if (id) fd.append('id', id);
+    if (id) {
+        fd.append('id', id);
+        const escopoRecorrencia = document.getElementById('cal_escopoRecorrencia')?.value || 'este_e_futuros';
+        fd.append('escopo_recorrencia', escopoRecorrencia);
+    }
     fd.append('titulo', titulo);
     fd.append('descricao', descricao);
     fd.append('local', local);

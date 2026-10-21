@@ -193,6 +193,17 @@ verificarLogin();
                     </div>
                 </div>
 
+                <div class="form-group" id="cal_group_escopo_recorrencia" style="display:none;">
+                    <label for="cal_escopoRecorrencia">Salvar alterações para</label>
+                    <select id="cal_escopoRecorrencia" name="escopo_recorrencia">
+                        <option value="este_e_futuros" selected>Esta e todas as tarefas futuras</option>
+                        <option value="somente_este">Somente esta tarefa</option>
+                    </select>
+                    <small style="display:block; margin-top:4px; color:var(--text-muted); font-size:12px;">
+                        Defina se as alterações (notificações, local, etc.) valem para todas as próximas repetições ou só para esta.
+                    </small>
+                </div>
+
                 <div id="mensagemErroCal" class="mensagem-erro"></div>
                 <button type="submit" id="btnSubmitCal" class="btn btn-primary btn-full">Criar Tarefa</button>
             </form>
